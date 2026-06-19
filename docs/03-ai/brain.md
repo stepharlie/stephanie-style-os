@@ -1,8 +1,11 @@
 # Brain
 
-Context Engine
-Recommendation Engine
-Learning Engine
-Shopping Engine
-Closet Audit Engine
-Memory Engine
+Core Brain
+- Context Engine
+- Decision Engine
+- Learning Engine
+- Memory Engine
+- Recommendation Engine
+- Shopping Engine
+- Closet Audit Engine
+- Outfit Engine
