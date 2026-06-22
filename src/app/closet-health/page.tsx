@@ -1,10 +1,35 @@
+import { EditorialPage } from "@/components/editorial-page";
+
 export default function ClosetHealthPage() {
   return (
-    <section className="rounded-3xl border border-[#eadfd4] bg-white p-6 shadow-sm">
-      <h1 className="text-3xl font-semibold">Closet Health</h1>
-      <p className="mt-3 text-[#765f53]">
-        Track gaps, duplicates, color balance, and shopping priorities.
-      </p>
-    </section>
+    <EditorialPage
+      eyebrow="Wardrobe Analysis"
+      title="Closet health,"
+      italicTitle="with intention."
+      description="A future dashboard for duplicates, gaps, color balance, outfit coverage, and shopping priorities."
+      stats={[
+        { value: "90%", label: "Neutral Base" },
+        { value: "5", label: "Color Gaps" },
+        { value: "3", label: "Priority Buys" },
+      ]}
+      actionLabel="Analyze"
+      features={[
+        {
+          title: "Gaps",
+          description:
+            "Identify missing colors, shoes, accessories, tropical pieces, and office outfit builders.",
+        },
+        {
+          title: "Duplicates",
+          description:
+            "Flag repeated black, beige, cream, and brown basics before adding more.",
+        },
+        {
+          title: "Priorities",
+          description:
+            "Turn closet gaps into a focused shopping plan instead of random wishlisting.",
+        },
+      ]}
+    />
   );
 }

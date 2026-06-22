@@ -1,10 +1,35 @@
+import { EditorialPage } from "@/components/editorial-page";
+
 export default function WishlistPage() {
   return (
-    <section className="rounded-3xl border border-[#eadfd4] bg-white p-6 shadow-sm">
-      <h1 className="text-3xl font-semibold">Wishlist</h1>
-      <p className="mt-3 text-[#765f53]">
-        Pieces under review before buying. Wishlist stays separate from owned closet.
-      </p>
-    </section>
+    <EditorialPage
+      eyebrow="Shopping Discipline"
+      title="Curated wishlist,"
+      italicTitle="not impulse buys."
+      description="Every potential piece needs a reason, a styling purpose, and a clear role before it becomes part of the closet."
+      stats={[
+        { value: "9", label: "Wishlist" },
+        { value: "3", label: "Priority" },
+        { value: "2", label: "Statement" },
+      ]}
+      actionLabel="+ Review Item"
+      features={[
+        {
+          title: "No duplicates",
+          description:
+            "A piece must be checked against what already exists before it earns a place on the wishlist.",
+        },
+        {
+          title: "Outfit potential",
+          description:
+            "Wishlist pieces should combine with enough owned items to justify buying.",
+        },
+        {
+          title: "Color strategy",
+          description:
+            "Prioritize warm, rich, tropical, and Dark Autumn-friendly colors that expand the closet.",
+        },
+      ]}
+    />
   );
 }
