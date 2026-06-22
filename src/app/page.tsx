@@ -1,14 +1,18 @@
+import { mockOutfits } from "@/lib/mock-outfits";
+import { mockOwnedItems } from "@/lib/mock-owned-items";
+import { mockWishlistItems } from "@/lib/mock-wishlist-items";
+
 const stats = [
   {
-    value: "48",
+    value: String(mockOwnedItems.length),
     label: "Owned Pieces",
   },
   {
-    value: "12",
+    value: String(mockOutfits.length),
     label: "Saved Outfits",
   },
   {
-    value: "9",
+    value: String(mockWishlistItems.length),
     label: "Wishlist",
   },
 ];
