@@ -1,70 +1,88 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { navigationItems } from "@/lib/navigation";
 
 type AppShellProps = { children: React.ReactNode };
 
 export function AppShell({ children }: AppShellProps) {
+  const [open, setOpen] = useState(false);
+  const half = Math.ceil(navigationItems.length / 2);
+  const left = navigationItems.slice(0, half);
+  const right = navigationItems.slice(half);
+
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--ink)]">
-      <div className="flex min-h-screen">
-        {/* Sidebar — deep espresso atelier panel */}
-        <aside className="hidden w-[18rem] flex-col justify-between bg-[var(--espresso)] px-8 py-10 text-[var(--cream)] lg:flex">
-          <div>
-            <div className="mb-12">
-              <span className="inline-block h-9 w-9 rounded-full border border-[var(--gold)]">
-                <span className="m-[10px] block h-[14px] w-[14px] rounded-full bg-[var(--gold)]" />
-              </span>
-              <p className="eyebrow mt-7">Closet OS</p>
-              <h1 className="font-display mt-2 text-[2rem] leading-[1.1] text-[var(--cream)]">
-                Stephanie<br />Style OS
-              </h1>
-              <p className="mt-5 text-[0.8125rem] leading-6 text-[var(--cream-soft)]">
-                A private wardrobe atelier for refined outfit formulas,
-                disciplined shopping, and elevated personal style.
-              </p>
-            </div>
+    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
+      {/* Top bar */}
+      <header className="border-b border-[var(--line)]">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 lg:px-10">
+          {/* Desktop: left nav */}
+          <nav className="hidden flex-1 gap-7 lg:flex">
+            {left.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-[0.6875rem] uppercase tracking-[0.16em] text-[var(--ink-soft)] transition hover:text-[var(--ink)]"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-            <nav className="space-y-1">
-              {navigationItems.map((item, i) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="group flex items-center justify-between rounded-[10px] px-4 py-3 text-sm text-[var(--cream-soft)] transition hover:bg-white/[0.04] hover:text-[var(--cream)]"
-                >
-                  <span className="tracking-wide">{item.label}</span>
-                  <span className="text-[0.625rem] tracking-[0.2em] text-[var(--gold)]/60 group-hover:text-[var(--gold)]">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                </Link>
-              ))}
-            </nav>
-          </div>
+          {/* Brand */}
+          <Link
+            href="/"
+            className="font-display text-xl tracking-[0.34em] text-[var(--ink)] lg:text-center"
+          >
+            THE&nbsp;EDIT
+          </Link>
 
-          <p className="text-[0.625rem] uppercase tracking-[0.3em] text-[var(--cream-soft)]/50">
-            Release 0.2
-          </p>
-        </aside>
+          {/* Desktop: right nav */}
+          <nav className="hidden flex-1 justify-end gap-7 lg:flex">
+            {right.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-[0.6875rem] uppercase tracking-[0.16em] text-[var(--ink-soft)] transition hover:text-[var(--ink)]"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-        {/* Main */}
-        <main className="flex-1">
-          <header className="px-6 pt-10 pb-6 lg:px-14 lg:pt-14">
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="eyebrow">Release 0.2</p>
-                <h2 className="font-display mt-2 text-3xl tracking-tight text-[var(--ink)]">
-                  App Foundation
-                </h2>
-              </div>
-              <span className="hidden rounded-full border border-[var(--line)] px-4 py-2 text-[0.6875rem] uppercase tracking-[0.2em] text-[var(--ink-soft)] sm:inline-block">
-                Owned ≠ Wishlist
-              </span>
-            </div>
-            <hr className="hairline mt-6" />
-          </header>
+          {/* Mobile: menu button */}
+          <button
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Toggle menu"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line)] text-[var(--ink)] lg:hidden"
+          >
+            <span className="text-lg leading-none">{open ? "\u00d7" : "\u2261"}</span>
+          </button>
+        </div>
 
-          <div className="px-6 pb-16 lg:px-14">{children}</div>
-        </main>
-      </div>
+        {/* Mobile: dropdown nav */}
+        {open && (
+          <nav className="border-t border-[var(--line)] bg-[var(--paper-2)] px-5 py-3 lg:hidden">
+            {navigationItems.map((item, i) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-between border-b border-[var(--line)] py-3.5 text-sm text-[var(--ink)] last:border-0"
+              >
+                <span className="tracking-wide">{item.label}</span>
+                <span className="text-[0.625rem] tracking-[0.18em] text-[var(--caramel)]">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </Link>
+            ))}
+          </nav>
+        )}
+      </header>
+
+      {/* Content */}
+      <main className="mx-auto max-w-6xl px-5 pb-20 lg:px-10">{children}</main>
     </div>
   );
 }
