@@ -1,24 +1,14 @@
 const dashboardCards = [
-  {
-    title: "Owned Closet",
-    value: "Separated",
-    detail: "Pieces you already own live here only.",
-  },
-  {
-    title: "Wishlist",
-    value: "Separate",
-    detail: "Items under review before buying.",
-  },
-  {
-    title: "Today's Style Win",
-    value: "Logged",
-    detail: "Blazer vest worn open felt comfortable, elegant, and polished.",
-  },
-  {
-    title: "Next Build",
-    value: "Mock Data",
-    detail: "Create sample closet and wishlist data before Supabase.",
-  },
+  { title: "Owned Closet", value: "Separated", detail: "Pieces you already own live here only." },
+  { title: "Wishlist", value: "Curated", detail: "Items under review before buying." },
+  { title: "Today's Style Win", value: "Logged", detail: "Blazer vest worn open — comfortable, elegant, polished." },
+  { title: "Next Build", value: "Mock Data", detail: "Create sample closet and wishlist data before Supabase." },
+];
+
+const styleRules = [
+  { title: "Owned is not Wishlist", body: "A piece cannot be treated as owned until it is physically in the closet. Wishlist items need review, outfit potential, and buying justification." },
+  { title: "Outfits are repeatable formulas", body: "When a combination works, it becomes a saved formula that can generate similar looks later." },
+  { title: "Shopping fills real gaps", body: "Wishlist pieces should add color, versatility, tropical energy, or styling power — never duplicate what already exists." },
 ];
 
 const nextActions = [
@@ -30,74 +20,87 @@ const nextActions = [
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-[#eadfd4] bg-[#fffaf5] p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-[0.25em] text-[#9a6b4f]">
-          Welcome back
-        </p>
-        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[#2c211c]">
-          Your wardrobe, but organized with intention.
-        </h1>
-        <p className="mt-4 max-w-3xl text-base leading-7 text-[#765f53]">
-          Closet OS starts with one clear rule: owned pieces and wishlist pieces
-          stay separate. From there, the app helps identify outfit formulas,
-          color gaps, duplicates, and better buying decisions.
-        </p>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {dashboardCards.map((card) => (
-          <article
-            key={card.title}
-            className="rounded-3xl border border-[#eadfd4] bg-white p-5 shadow-sm"
-          >
-            <p className="text-sm font-medium text-[#765f53]">{card.title}</p>
-            <p className="mt-3 text-2xl font-semibold text-[#2c211c]">
-              {card.value}
-            </p>
-            <p className="mt-2 text-sm leading-6 text-[#765f53]">
-              {card.detail}
-            </p>
-          </article>
-        ))}
-      </section>
-
-      <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-3xl border border-[#eadfd4] bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">Core Style Rules</h2>
-          <div className="mt-5 space-y-4">
-            <div className="rounded-2xl bg-[#f8f3ed] p-4">
-              <p className="font-medium">Owned is not Wishlist</p>
-              <p className="mt-1 text-sm leading-6 text-[#765f53]">
-                A piece cannot be treated as owned until it is physically in the
-                closet. Wishlist items need review, outfit potential, and buying
-                justification.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-[#f8f3ed] p-4">
-              <p className="font-medium">Outfits should be repeatable formulas</p>
-              <p className="mt-1 text-sm leading-6 text-[#765f53]">
-                When a combination works, it should become a saved formula that
-                can generate similar looks later.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-[#f8f3ed] p-4">
-              <p className="font-medium">Shopping must fill real gaps</p>
-              <p className="mt-1 text-sm leading-6 text-[#765f53]">
-                Wishlist pieces should add color, versatility, tropical energy,
-                or styling power without duplicating what already exists.
-              </p>
-            </div>
+    <div className="space-y-16">
+      {/* Hero — editorial */}
+      <section className="grid gap-10 lg:grid-cols-[1.5fr_1fr] lg:items-start">
+        <div>
+          <p className="eyebrow">Private Wardrobe Atelier</p>
+          <h1 className="font-display mt-5 text-[3.25rem] leading-[1.02] tracking-tight text-[var(--ink)]">
+            Curated closet.<br />Polished outfits.
+          </h1>
+          <p className="mt-7 max-w-xl text-[0.9375rem] leading-7 text-[var(--ink-soft)]">
+            A private styling system for owned inventory, wishlist discipline,
+            outfit formulas, and shopping decisions that feel intentional.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-2.5">
+            {["Dark Autumn", "Warm Espresso", "Office Polish", "Tropical Color"].map((t) => (
+              <span key={t} className="rounded-full border border-[var(--line)] px-4 py-2 text-[0.6875rem] uppercase tracking-[0.18em] text-[var(--ink-soft)]">
+                {t}
+              </span>
+            ))}
           </div>
         </div>
 
-        <div className="rounded-3xl border border-[#eadfd4] bg-[#3b2a22] p-6 text-[#fffaf5] shadow-sm">
-          <h2 className="text-xl font-semibold">Next Actions</h2>
-          <ul className="mt-5 space-y-3 text-sm leading-6 text-[#f5e8dd]">
+        {/* Style win — espresso panel */}
+        <aside className="rounded-[var(--radius)] bg-[var(--espresso)] p-8 text-[var(--cream)] shadow-soft">
+          <p className="eyebrow">Today&apos;s Style Win</p>
+          <p className="font-display mt-5 text-[1.75rem] leading-snug text-[var(--cream)]">
+            The vest works better open.
+          </p>
+          <hr className="my-6 border-0 border-t border-[var(--line-dark)]" />
+          <p className="text-[0.875rem] leading-7 text-[var(--cream-soft)]">
+            It creates a vertical line, avoids stiffness, and makes the outfit
+            feel more relaxed, elegant, and expensive.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {["Polished", "Comfortable", "Office"].map((t) => (
+              <span key={t} className="rounded-full border border-[var(--line-dark)] px-3.5 py-1.5 text-[0.625rem] uppercase tracking-[0.18em] text-[var(--cream-soft)]">
+                {t}
+              </span>
+            ))}
+          </div>
+        </aside>
+      </section>
+
+      {/* Status row — hairline-separated, no boxes */}
+      <section>
+        <div className="grid divide-y divide-[var(--line)] border-t border-[var(--line)] sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4">
+          {dashboardCards.map((card, i) => (
+            <article
+              key={card.title}
+              className={`px-0 py-7 sm:px-7 ${i !== 0 ? "lg:border-l lg:border-[var(--line)]" : ""}`}
+            >
+              <p className="eyebrow !text-[var(--ink-soft)] !tracking-[0.22em]">{card.title}</p>
+              <p className="font-display mt-3 text-2xl text-[var(--ink)]">{card.value}</p>
+              <p className="mt-2 text-[0.8125rem] leading-6 text-[var(--ink-soft)]">{card.detail}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {/* Rules + Actions */}
+      <section className="grid gap-10 lg:grid-cols-[1.3fr_0.7fr]">
+        <div>
+          <h2 className="font-display text-2xl text-[var(--ink)]">Core Style Rules</h2>
+          <div className="mt-7 space-y-7">
+            {styleRules.map((r, i) => (
+              <div key={r.title} className="flex gap-5">
+                <span className="font-display text-lg text-[var(--gold)]">{String(i + 1).padStart(2, "0")}</span>
+                <div>
+                  <p className="font-medium text-[var(--ink)]">{r.title}</p>
+                  <p className="mt-1.5 max-w-xl text-[0.875rem] leading-7 text-[var(--ink-soft)]">{r.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--surface)] p-8">
+          <h2 className="font-display text-xl text-[var(--ink)]">Next Actions</h2>
+          <ul className="mt-6 space-y-0 divide-y divide-[var(--line)]">
             {nextActions.map((action) => (
-              <li key={action} className="rounded-2xl bg-white/10 px-4 py-3">
+              <li key={action} className="flex items-start gap-3 py-3.5 text-[0.875rem] leading-6 text-[var(--ink-soft)]">
+                <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-[var(--gold)]" />
                 {action}
               </li>
             ))}
