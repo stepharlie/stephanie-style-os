@@ -1,145 +1,92 @@
-import type { ColorFamily } from "@/types/wardrobe";
 import type { OutfitLook, OutfitPiece } from "@/lib/mock-outfits";
+import { AtelierPlaceholder } from "@/components/atelier-placeholder";
 
-const toneByColor: Record<ColorFamily, string> = {
-  black: "#241711",
-  brown: "#94714d",
-  cream: "#d7c7a7",
-  beige: "#c8b08b",
-  white: "#dfd2bd",
-  burgundy: "#6b2f2a",
-  olive: "#6f6b43",
-  camel: "#c4aa84",
-  plum: "#5d3f4d",
-  mustard: "#b58a3f",
-  denim: "#43566d",
-  blue: "#5b7a9b",
-  statement: "#b89392",
+type OutfitCollageCardProps = {
+  look: OutfitLook;
 };
 
-function renderPiece(piece: OutfitPiece) {
-  const tone = toneByColor[piece.colorFamily];
+const defaultPositions = [
+  { left: "7%", top: "10%", width: "44%", rotate: "-5deg" },
+  { left: "46%", top: "7%", width: "42%", rotate: "6deg" },
+  { left: "16%", top: "43%", width: "38%", rotate: "4deg" },
+  { left: "54%", top: "44%", width: "34%", rotate: "-7deg" },
+  { left: "34%", top: "66%", width: "32%", rotate: "2deg" },
+];
+
+function formatSlot(slot?: string) {
+  return slot?.replace("-", " ") ?? "piece";
+}
+
+function renderPiece(piece: OutfitPiece, index: number) {
+  const fallback = defaultPositions[index % defaultPositions.length];
+
+  const style = {
+    left: piece.x ?? fallback.left,
+    top: piece.y ?? fallback.top,
+    width: piece.width ?? fallback.width,
+    transform: `rotate(${piece.rotate ?? fallback.rotate})`,
+  };
+
+  if (piece.imageUrl) {
+    return (
+      <div
+        key={piece.id}
+        className="absolute aspect-[3/4] rounded-[3px] bg-contain bg-center bg-no-repeat drop-shadow-[0_18px_24px_rgba(74,47,34,0.16)]"
+        style={{ ...style, backgroundImage: `url(${piece.imageUrl})` }}
+        aria-label={piece.name}
+      />
+    );
+  }
 
   return (
     <div
       key={piece.id}
-      className="absolute overflow-hidden rounded-[28px] shadow-[0_20px_40px_rgba(36,23,17,0.08)]"
-      style={{
-        top: piece.top,
-        left: piece.left,
-        width: piece.width,
-        height: piece.height,
-        transform: `rotate(${piece.rotate ?? 0}deg)`,
-      }}
+      className="absolute aspect-[3/4] drop-shadow-[0_18px_24px_rgba(74,47,34,0.16)]"
+      style={style}
     >
-      <div
-        className="relative h-full w-full rounded-[28px]"
-        style={{
-          background: piece.imageUrl
-            ? "transparent"
-            : `linear-gradient(180deg, ${tone} 0%, ${tone}F0 100%)`,
-          backgroundImage: piece.imageUrl ? `url(${piece.imageUrl})` : undefined,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-          backgroundSize: "contain",
-        }}
-      >
-        <span className="pointer-events-none absolute inset-3 rounded-[22px] border border-white/18" />
-
-        {!piece.imageUrl ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center">
-            <p className="text-[0.52rem] font-semibold uppercase tracking-[0.24em] text-white/65">
-              {piece.slot}
-            </p>
-            <p className="font-display mt-3 text-[1rem] leading-tight text-white/92">
-              {piece.name}
-            </p>
-          </div>
-        ) : null}
-      </div>
+      <AtelierPlaceholder
+        name={piece.name}
+        colorName={piece.colorName}
+        colorFamily={piece.colorFamily}
+        category={formatSlot(piece.slot)}
+        className="h-full"
+        compact
+      />
     </div>
   );
 }
 
-export function OutfitCollageCard({ look }: { look: OutfitLook }) {
+export function OutfitCollageCard({ look }: OutfitCollageCardProps) {
   return (
-    <article className="overflow-hidden rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)]">
-      <div
-        className="relative h-[25rem] overflow-hidden border-b border-[var(--line)]"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(255,251,245,0.95) 0%, rgba(246,236,220,0.68) 100%)",
-        }}
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.58),transparent_35%)]" />
-
-        <div className="absolute right-5 top-5 rounded-full border border-[rgba(255,255,255,0.35)] bg-[rgba(251,246,238,0.88)] px-3 py-2 text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-[var(--espresso)] backdrop-blur">
-          Collage view
+    <article className="overflow-hidden rounded-[4px] border border-[var(--line)] bg-[var(--paper)] shadow-[0_18px_60px_rgba(74,47,34,0.06)]">
+      <div className="relative h-[25rem] overflow-hidden bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.9),transparent_26%),linear-gradient(135deg,var(--paper-2),#ead8c0)]">
+        <div className="absolute inset-6 border border-white/55" />
+        <div className="absolute left-6 top-6 z-10">
+          <p className="text-[0.52rem] font-semibold uppercase tracking-[0.24em] text-[var(--caramel)]">
+            {look.occasion}
+          </p>
         </div>
-
-        {look.pieces.map(renderPiece)}
+        {look.pieces.map((piece, index) => renderPiece(piece, index))}
       </div>
 
-      <div className="px-7 pb-7 pt-6">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-[0.58rem] font-medium uppercase tracking-[0.24em] text-[var(--caramel)]">
-            {look.vibe} · {look.occasion}
-          </span>
-
-          <span className="text-[0.55rem] font-medium uppercase tracking-[0.2em] text-[var(--coffee)]">
-            {look.saved ? "Saved formula" : "Styled look"}
-          </span>
-        </div>
-
-        <h3 className="font-display mb-4 mt-3 text-[2.15rem] leading-[1.04] text-[var(--espresso)]">
-          {look.title}
-        </h3>
-
-        <p className="text-[0.98rem] leading-7 text-[var(--ink-soft)]">
-          {look.caption}
+      <div className="px-6 pb-6 pt-5">
+        <p className="text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+          {look.vibe}
         </p>
-
-        <div className="mt-5 border-y border-[var(--line)] py-4">
-          <p className="mb-3 text-[0.55rem] font-medium uppercase tracking-[0.22em] text-[var(--caramel)]">
-            Formula
-          </p>
-
-          <div className="flex flex-wrap gap-2.5">
-            {look.formula.map((item) => (
-              <span
-                key={item}
-                className="rounded-full border border-[var(--line)] px-3 py-1.5 text-[0.6rem] font-medium uppercase tracking-[0.18em] text-[var(--coffee)]"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <p className="font-display mt-5 text-[1.05rem] italic leading-[1.5] text-[var(--coffee)]">
+        <h3 className="font-display mt-2 text-[2rem] leading-none text-[var(--espresso)]">
+          {look.name}
+        </h3>
+        <p className="mt-4 text-sm leading-6 text-[var(--ink-soft)]">
           {look.notes}
         </p>
 
-        <div className="mt-6 flex items-center justify-between gap-4 border-t border-[var(--line)] pt-4">
-          <span className="text-[0.55rem] font-medium uppercase tracking-[0.22em] text-[var(--caramel)]">
-            {String(look.pieces.length).padStart(2, "0")} pieces
-          </span>
-
-          <div className="flex items-center gap-5">
-            <button
-              type="button"
-              className="border-b-[1.5px] border-[var(--espresso)] pb-[3px] text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[var(--espresso)]"
-            >
-              Open look
-            </button>
-
-            <button
-              type="button"
-              className="border-b-[1.5px] border-transparent pb-[3px] text-[0.56rem] font-semibold uppercase tracking-[0.18em] text-[var(--coffee)] transition hover:border-[var(--coffee)]"
-            >
-              Add to log
-            </button>
-          </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button className="rounded-full border border-[var(--espresso)] px-4 py-2 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--espresso)]">
+            Open look
+          </button>
+          <button className="rounded-full border border-[var(--line)] px-4 py-2 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--coffee)]">
+            Add to log
+          </button>
         </div>
       </div>
     </article>
