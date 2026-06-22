@@ -7,33 +7,8 @@ import {
   type BuyOrderFilterId,
 } from "@/components/buy-order-filter";
 import { WishlistCard } from "@/components/wishlist-card";
-import type { WishlistItem, WishlistPriorityTier } from "@/types/wardrobe";
+import type { WishlistItem } from "@/types/wardrobe";
 import { mockWishlistItems } from "@/lib/mock-wishlist-items";
-
-const prioritySections: {
-  tier: WishlistPriorityTier;
-  title: string;
-  description: string;
-}[] = [
-  {
-    tier: "foundation-buys",
-    title: "Foundation buys",
-    description:
-      "Buy first. These pieces build the most outfits and fill the most important closet gaps.",
-  },
-  {
-    tier: "color-builders",
-    title: "Color builders",
-    description:
-      "Next priority. These add intentional color while still working with the existing closet.",
-  },
-  {
-    tier: "statement-review",
-    title: "Statement review",
-    description:
-      "Only buy if the piece creates enough outfits or brings a strong fun/tropical payoff.",
-  },
-];
 
 function sortWishlistItems(items: WishlistItem[]) {
   return [...items].sort((a, b) => {
@@ -70,11 +45,6 @@ export function WishlistPriorityBoard() {
   const filteredItems = sortWishlistItems(
     mockWishlistItems.filter((item) => matchesFilter(item, activeFilter)),
   );
-
-  const groupedWishlist = prioritySections.map((section) => ({
-    ...section,
-    items: filteredItems.filter((item) => item.priorityTier === section.tier),
-  }));
 
   return (
     <section className="mx-auto max-w-6xl px-6 pb-16 pt-10 md:px-10 md:pb-20 md:pt-12">
