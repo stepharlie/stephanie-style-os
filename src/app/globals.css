@@ -1,37 +1,44 @@
 @import "tailwindcss";
 
 /* ===========================================================
-   THE STEPHANIE EDIT — Editorial Warm Espresso
-   Cream base, espresso/coffee/caramel palette, fine serif,
-   generous space, hairline rules. Responsive: desktop-faithful,
-   mobile-adapted.
+   THE EDIT — Editorial Warm Espresso
+   Cream base, espresso/caramel palette, serif headline,
+   top navigation, boutique atelier layout.
    =========================================================== */
 
 :root {
-  --paper: #f4ede2;        /* warm cream base */
-  --paper-2: #fbf6ee;      /* raised surface */
-  --espresso: #1f1611;     /* deep espresso panel */
-  --coffee: #5b4636;       /* mid coffee */
-  --caramel: #a9794e;      /* caramel accent */
+  --page: #cbbfae;
+  --paper: #f5eee4;
+  --paper-2: #fbf6ee;
+  --espresso: #241711;
+  --coffee: #5b4636;
+  --caramel: #a9794e;
   --caramel-soft: #c39b6f;
-  --ink: #2a201a;          /* primary text */
-  --ink-soft: #8a7361;     /* secondary text */
-  --line: #e3d6c5;         /* hairline */
-  --cream: #f3e8da;
-  --cream-soft: #cdb89f;
+  --ink: #251914;
+  --ink-soft: #7b6554;
+  --line: #e1d4c2;
+  --cream: #eadcc8;
+  --camel: #c4aa84;
+  --brown: #94714d;
 
-  --background: var(--paper);
+  --background: var(--page);
   --foreground: var(--ink);
-  --radius: 14px;
 }
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
-  background: var(--paper);
+  min-height: 100vh;
+  margin: 0;
+  background: var(--page);
   color: var(--ink);
-  font-family: var(--font-sans), "Inter", system-ui, sans-serif;
+  font-family: var(--font-sans), Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -39,27 +46,67 @@ body {
 .font-display {
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-weight: 400;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
 .eyebrow {
-  font-size: 0.6875rem;
+  font-size: 0.72rem;
   font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.32em;
+  letter-spacing: 0.34em;
   color: var(--caramel);
 }
 
-.hairline { border: 0; border-top: 1px solid var(--line); }
+.hairline {
+  border: 0;
+  border-top: 1px solid var(--line);
+}
 
-.shadow-soft { box-shadow: 0 28px 70px -38px rgba(31,22,17,0.4); }
+.editorial-shell {
+  background: var(--paper);
+  border: 1px solid rgba(255, 255, 255, 0.54);
+  box-shadow:
+    0 42px 100px rgba(36, 23, 17, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+.nav-link {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--coffee);
+  transition: color 180ms ease, opacity 180ms ease;
+}
+
+.nav-link:hover {
+  color: var(--espresso);
+}
+
+.stat-divider {
+  border-left: 1px solid var(--line);
+}
+
+.outfit-card {
+  min-height: 15rem;
+  border-radius: 0.7rem;
+  box-shadow:
+    0 20px 46px rgba(36, 23, 17, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
 
 .lift {
-  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s ease;
-}
-.lift:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 34px 80px -40px rgba(31,22,17,0.45);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s ease;
 }
 
-::selection { background: var(--caramel-soft); color: var(--espresso); }
+.lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 34px 70px rgba(36, 23, 17, 0.14);
+}
+
+::selection {
+  background: var(--caramel-soft);
+  color: var(--espresso);
+}

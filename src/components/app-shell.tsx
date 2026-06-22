@@ -1,88 +1,55 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
-import { navigationItems } from "@/lib/navigation";
+import {
+  leftNavigationItems,
+  rightNavigationItems,
+} from "@/lib/navigation";
 
-type AppShellProps = { children: React.ReactNode };
+type AppShellProps = {
+  children: React.ReactNode;
+};
 
 export function AppShell({ children }: AppShellProps) {
-  const [open, setOpen] = useState(false);
-  const half = Math.ceil(navigationItems.length / 2);
-  const left = navigationItems.slice(0, half);
-  const right = navigationItems.slice(half);
-
   return (
-    <div className="min-h-screen bg-[var(--paper)] text-[var(--ink)]">
-      {/* Top bar */}
-      <header className="border-b border-[var(--line)]">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 lg:px-10">
-          {/* Desktop: left nav */}
-          <nav className="hidden flex-1 gap-7 lg:flex">
-            {left.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-[0.6875rem] uppercase tracking-[0.16em] text-[var(--ink-soft)] transition hover:text-[var(--ink)]"
-              >
-                {item.label}
+    <main className="min-h-screen bg-[var(--page)] px-3 py-5 text-[var(--ink)] md:px-6 md:py-8">
+      <div className="editorial-shell mx-auto min-h-[calc(100vh-2.5rem)] max-w-7xl overflow-hidden rounded-[1.3rem] md:min-h-[calc(100vh-4rem)] md:rounded-[1.45rem]">
+        <header className="border-b border-[var(--line)]">
+          <nav className="grid min-h-16 grid-cols-3 items-center px-6 md:px-10">
+            <div className="hidden items-center gap-8 md:flex">
+              {leftNavigationItems.map((item) => (
+                <Link key={item.href} href={item.href} className="nav-link">
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            <Link
+              href="/"
+              className="font-display justify-self-center text-2xl uppercase tracking-[0.38em] text-[var(--espresso)]"
+            >
+              The Edit
+            </Link>
+
+            <div className="hidden items-center justify-end gap-8 md:flex">
+              {rightNavigationItems.map((item) => (
+                <Link key={item.href} href={item.href} className="nav-link">
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-5 md:hidden">
+              <Link href="/closet" className="nav-link">
+                Closet
               </Link>
-            ))}
-          </nav>
-
-          {/* Brand */}
-          <Link
-            href="/"
-            className="font-display text-xl tracking-[0.34em] text-[var(--ink)] lg:text-center"
-          >
-            THE&nbsp;EDIT
-          </Link>
-
-          {/* Desktop: right nav */}
-          <nav className="hidden flex-1 justify-end gap-7 lg:flex">
-            {right.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-[0.6875rem] uppercase tracking-[0.16em] text-[var(--ink-soft)] transition hover:text-[var(--ink)]"
-              >
-                {item.label}
+              <Link href="/wishlist" className="nav-link">
+                Wishlist
               </Link>
-            ))}
+            </div>
           </nav>
+        </header>
 
-          {/* Mobile: menu button */}
-          <button
-            onClick={() => setOpen((v) => !v)}
-            aria-label="Toggle menu"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[var(--line)] text-[var(--ink)] lg:hidden"
-          >
-            <span className="text-lg leading-none">{open ? "\u00d7" : "\u2261"}</span>
-          </button>
-        </div>
-
-        {/* Mobile: dropdown nav */}
-        {open && (
-          <nav className="border-t border-[var(--line)] bg-[var(--paper-2)] px-5 py-3 lg:hidden">
-            {navigationItems.map((item, i) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-between border-b border-[var(--line)] py-3.5 text-sm text-[var(--ink)] last:border-0"
-              >
-                <span className="tracking-wide">{item.label}</span>
-                <span className="text-[0.625rem] tracking-[0.18em] text-[var(--caramel)]">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-              </Link>
-            ))}
-          </nav>
-        )}
-      </header>
-
-      {/* Content */}
-      <main className="mx-auto max-w-6xl px-5 pb-20 lg:px-10">{children}</main>
-    </div>
+        {children}
+      </div>
+    </main>
   );
 }

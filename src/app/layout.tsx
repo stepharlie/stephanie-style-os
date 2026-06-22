@@ -1,34 +1,33 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter_Tight } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
 
-const serif = Fraunces({
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
-  display: "swap",
 });
 
-const sans = Inter_Tight({
+const cormorant = Cormorant_Garamond({
+  variable: "--font-serif",
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-sans",
-  display: "swap",
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
   title: "The Stephanie Edit",
-  description: "A private wardrobe atelier for refined outfit formulas, disciplined shopping, and elevated personal style.",
+  description: "Private wardrobe atelier for closet, wishlist, outfits, and style planning.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable}`}>
-      <body>
+    <html lang="en" data-scroll-behavior="smooth">
+      <body className={`${inter.variable} ${cormorant.variable}`}>
         <AppShell>{children}</AppShell>
       </body>
     </html>
