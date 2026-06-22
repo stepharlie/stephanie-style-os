@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app-shell";
 
 const serif = Fraunces({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
   style: ["normal", "italic"],
   variable: "--font-serif",
   display: "swap",
@@ -13,13 +13,13 @@ const serif = Fraunces({
 
 const sans = Inter_Tight({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500"],
   variable: "--font-sans",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Stephanie Style OS",
+  title: "The Stephanie Edit",
   description: "A private wardrobe atelier for refined outfit formulas, disciplined shopping, and elevated personal style.",
 };
 

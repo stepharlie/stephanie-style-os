@@ -1,30 +1,26 @@
 @import "tailwindcss";
 
 /* ===========================================================
-   STYLE OS — Luxury Boutique Atelier
-   Editorial serif + quiet sans, warm espresso palette,
-   champagne accent, generous space, hairline rules.
+   THE STEPHANIE EDIT — Editorial Warm Espresso
+   Cream base, espresso/coffee/caramel palette, fine serif,
+   generous space, hairline rules. Responsive: desktop-faithful,
+   mobile-adapted.
    =========================================================== */
 
 :root {
-  /* Core palette (5 disciplined tones) */
-  --bg: #f4ede4;          /* warm paper */
-  --surface: #fbf6f0;     /* raised paper */
-  --espresso: #211712;    /* deep brown panel */
-  --ink: #2c211c;         /* primary text */
-  --ink-soft: #6f5b50;    /* secondary text */
-  --line: #e3d5c7;        /* hairline */
+  --paper: #f4ede2;        /* warm cream base */
+  --paper-2: #fbf6ee;      /* raised surface */
+  --espresso: #1f1611;     /* deep espresso panel */
+  --coffee: #5b4636;       /* mid coffee */
+  --caramel: #a9794e;      /* caramel accent */
+  --caramel-soft: #c39b6f;
+  --ink: #2a201a;          /* primary text */
+  --ink-soft: #8a7361;     /* secondary text */
+  --line: #e3d6c5;         /* hairline */
+  --cream: #f3e8da;
+  --cream-soft: #cdb89f;
 
-  /* Single metallic accent */
-  --gold: #b08850;
-  --gold-soft: #c9a877;
-
-  /* On-dark tones (for espresso panels) */
-  --cream: #f6ede2;
-  --cream-soft: #d8c7b6;
-  --line-dark: #4a3a30;
-
-  --background: var(--bg);
+  --background: var(--paper);
   --foreground: var(--ink);
   --radius: 14px;
 }
@@ -33,7 +29,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--bg);
+  background: var(--paper);
   color: var(--ink);
   font-family: var(--font-sans), "Inter", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -43,7 +39,7 @@ body {
 .font-display {
   font-family: var(--font-serif), Georgia, "Times New Roman", serif;
   font-weight: 400;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
 }
 
 .eyebrow {
@@ -51,19 +47,19 @@ body {
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.32em;
-  color: var(--gold);
+  color: var(--caramel);
 }
 
 .hairline { border: 0; border-top: 1px solid var(--line); }
 
-.shadow-soft { box-shadow: 0 24px 60px -32px rgba(33,23,18,0.28); }
+.shadow-soft { box-shadow: 0 28px 70px -38px rgba(31,22,17,0.4); }
 
 .lift {
   transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), box-shadow 0.4s ease;
 }
 .lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 30px 70px -36px rgba(33,23,18,0.32);
+  box-shadow: 0 34px 80px -40px rgba(31,22,17,0.45);
 }
 
-::selection { background: var(--gold-soft); color: var(--espresso); }
+::selection { background: var(--caramel-soft); color: var(--espresso); }
