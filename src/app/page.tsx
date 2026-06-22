@@ -17,24 +17,7 @@ const stats = [
   },
 ];
 
-const outfitBoards = [
-  {
-    title: "Office polish",
-    color: "bg-[#d9c6a9]",
-  },
-  {
-    title: "Warm neutral",
-    color: "bg-[#c6aa80]",
-  },
-  {
-    title: "Espresso base",
-    color: "bg-[#94714d]",
-  },
-  {
-    title: "Soft cream",
-    color: "bg-[#e8dcc8]",
-  },
-];
+const boardColors = ["bg-[#d9c6a9]", "bg-[#c6aa80]", "bg-[#94714d]", "bg-[#e8dcc8]"];
 
 export default function DashboardPage() {
   return (
@@ -91,15 +74,24 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-4">
-          {outfitBoards.map((board) => (
+        <div className="grid gap-4 md:grid-cols-3">
+          {mockOutfits.map((outfit, index) => (
             <article
-              key={board.title}
-              className={`outfit-card lift ${board.color} p-5`}
+              key={outfit.id}
+              className={`outfit-card lift ${boardColors[index % boardColors.length]} p-5`}
             >
-              <div className="flex h-full flex-col justify-end">
-                <p className="text-[0.68rem] font-medium uppercase tracking-[0.28em] text-white/75">
-                  {board.title}
+              <div className="flex h-full flex-col justify-between">
+                <div>
+                  <p className="text-[0.68rem] font-medium uppercase tracking-[0.28em] text-white/75">
+                    {outfit.occasion}
+                  </p>
+                  <h3 className="font-display mt-3 text-3xl leading-tight text-white">
+                    {outfit.name}
+                  </h3>
+                </div>
+
+                <p className="mt-8 text-sm leading-6 text-white/80">
+                  {outfit.notes}
                 </p>
               </div>
             </article>

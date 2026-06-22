@@ -34,6 +34,11 @@ export type StyleVibe =
   | "statement"
   | "casual";
 
+export type PricePoint = {
+  date: string;
+  price: number;
+};
+
 export type WardrobeItem = {
   id: string;
   name: string;
@@ -44,6 +49,7 @@ export type WardrobeItem = {
   size?: string;
   brand?: string;
   source?: string;
+  imageUrl?: string;
   vibes: StyleVibe[];
   notes?: string;
   stylingNotes?: string;
@@ -54,6 +60,11 @@ export type WishlistDecision =
   | "consider"
   | "skip"
   | "buy-priority";
+
+export type WishlistPriorityTier =
+  | "foundation-buys"
+  | "color-builders"
+  | "statement-review";
 
 export type ClosetGap =
   | "color"
@@ -74,12 +85,22 @@ export type WishlistItem = {
   size?: string;
   brand?: string;
   source?: string;
+  productUrl?: string;
+  imageUrl?: string;
   vibes: StyleVibe[];
   decision: WishlistDecision;
+  priorityTier: WishlistPriorityTier;
+  purchaseOrder: number;
   duplicateRisk: "low" | "medium" | "high";
   closetGap: ClosetGap;
   priorityScore: number;
   outfitPotential: number;
+  closetImpactScore: number;
+  currentPrice?: number;
+  targetPrice?: number;
+  lowestPrice?: number;
+  priceWatch?: boolean;
+  priceHistory?: PricePoint[];
   notes?: string;
 };
 
@@ -91,5 +112,6 @@ export type OutfitFormula = {
   vibe: StyleVibe[];
   pieces: string[];
   colorStory: string[];
+  imageUrls?: string[];
   notes: string;
 };
