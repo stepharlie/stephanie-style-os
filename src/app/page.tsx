@@ -209,7 +209,7 @@ export default function HomePage() {
               </div>
 
               <span className="rounded-full border border-[var(--line)] px-3 py-1.5 text-[0.55rem] font-medium uppercase tracking-[0.2em] text-[var(--coffee)]">
-                Mock data
+                Preview
               </span>
             </div>
 

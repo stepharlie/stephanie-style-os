@@ -1,4 +1,4 @@
-import { EditorialPageHeader } from "@/components/editorial-page-header";
+import { PageHeader } from "@/components/page-header";
 
 const profileStats = [
   {
@@ -21,7 +21,7 @@ const profileStats = [
 export default function SettingsPage() {
   return (
     <main className="pb-16 md:pb-20">
-      <EditorialPageHeader
+      <PageHeader
         eyebrow="Style Profile"
         title={
           <>

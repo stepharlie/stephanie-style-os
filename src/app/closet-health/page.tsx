@@ -1,4 +1,5 @@
-import { EditorialPageHeader } from "@/components/editorial-page-header";
+import Link from "next/link";
+import { PageHeader } from "@/components/page-header";
 
 const healthSignals = [
   {
@@ -21,7 +22,7 @@ const healthSignals = [
 export default function ClosetHealthPage() {
   return (
     <main className="pb-16 md:pb-20">
-      <EditorialPageHeader
+      <PageHeader
         eyebrow="Closet Health"
         title={
           <>
@@ -32,7 +33,22 @@ export default function ClosetHealthPage() {
         description="A health check for your closet: color balance, outfit coverage, repeat patterns, gaps, and pieces that need more styling support."
         asideEyebrow="System Signal"
         asideText="The intelligence layer for shopping less randomly."
-      />
+      >
+        <div className="flex flex-wrap gap-5">
+          <Link
+            href="/closet"
+            className="border-b-[1.5px] border-transparent pb-[3px] text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-[var(--coffee)] no-underline transition hover:border-[var(--coffee)]"
+          >
+            Wardrobe Gallery
+          </Link>
+          <Link
+            href="/closet-health"
+            className="border-b-[1.5px] border-[var(--espresso)] pb-[3px] text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-[var(--espresso)] no-underline"
+          >
+            Closet Health
+          </Link>
+        </div>
+      </PageHeader>
 
       <section className="mx-auto max-w-6xl px-6 py-10 md:px-10">
         <div className="grid gap-5 md:grid-cols-3">

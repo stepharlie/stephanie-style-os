@@ -1,4 +1,4 @@
-import { EditorialPageHeader } from "@/components/editorial-page-header";
+import { PageHeader } from "@/components/page-header";
 import { WishlistPriorityBoard } from "@/components/wishlist-priority-board";
 import { mockWishlistItems } from "@/lib/mock-wishlist-items";
 
@@ -7,7 +7,7 @@ const priceWatchCount = mockWishlistItems.filter((item) => item.priceWatch).leng
 export default function WishlistPage() {
   return (
     <>
-      <EditorialPageHeader
+      <PageHeader
         eyebrow="Shopping Discipline"
         title={
           <>

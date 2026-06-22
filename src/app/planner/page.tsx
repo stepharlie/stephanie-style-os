@@ -1,4 +1,4 @@
-import { EditorialPageHeader } from "@/components/editorial-page-header";
+import { PageHeader } from "@/components/page-header";
 
 const logStats = [
   {
@@ -21,7 +21,7 @@ const logStats = [
 export default function PlannerPage() {
   return (
     <main className="pb-16 md:pb-20">
-      <EditorialPageHeader
+      <PageHeader
         eyebrow="Outfit Log"
         title={
           <>
