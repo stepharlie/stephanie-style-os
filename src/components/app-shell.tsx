@@ -35,7 +35,7 @@ export function AppShell({ children }: AppShellProps) {
 
             <Link
               href="/"
-              className="font-display justify-self-center text-3xl uppercase tracking-[0.42em] text-[var(--espresso)] md:text-[2.15rem]"
+              className="font-display justify-self-center text-[2.85rem] uppercase leading-none tracking-[0.16em] text-[var(--espresso)] no-underline md:text-[3.45rem]"
             >
               The Edit
             </Link>
@@ -54,7 +54,7 @@ export function AppShell({ children }: AppShellProps) {
             <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between px-5">
               <Link
                 href="/"
-                className="font-display text-2xl uppercase tracking-[0.28em] text-[var(--espresso)]"
+                className="font-display text-[2.15rem] uppercase leading-none tracking-[0.14em] text-[var(--espresso)] no-underline"
               >
                 The Edit
               </Link>

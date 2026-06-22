@@ -117,7 +117,7 @@ export function ClosetCategoryBoard() {
   );
 
   return (
-    <section className="mx-auto max-w-6xl px-6 pb-16 md:px-10 md:pb-20">
+    <section className="mx-auto max-w-6xl px-6 pb-16 pt-10 md:px-10 md:pb-20 md:pt-12">
       <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
           <p className="eyebrow mb-3">Owned Wardrobe</p>

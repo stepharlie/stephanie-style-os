@@ -77,7 +77,7 @@ export function WishlistPriorityBoard() {
   }));
 
   return (
-    <section className="mx-auto max-w-6xl px-6 pb-16 md:px-10 md:pb-20">
+    <section className="mx-auto max-w-6xl px-6 pb-16 pt-10 md:px-10 md:pb-20 md:pt-12">
       <BuyOrderFilter
         items={mockWishlistItems}
         active={activeFilter}
@@ -85,43 +85,39 @@ export function WishlistPriorityBoard() {
       />
 
       {activeFilter === "all" ? (
-        <div className="space-y-14">
-          {groupedWishlist.map((section) => (
-            <section key={section.tier}>
-              <div className="mb-6 border-t border-[var(--line)] pt-7">
-                <p className="text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[var(--caramel)]">
-                  Purchase tier
-                </p>
+        <section>
+          <div className="mb-6 border-t border-[var(--line)] pt-7">
+            <p className="text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[var(--caramel)]">
+              Full wishlist
+            </p>
 
-                <h3 className="font-display mt-3 text-4xl text-[var(--espresso)]">
-                  {section.title}
-                </h3>
+            <h3 className="font-display mt-3 text-4xl text-[var(--espresso)]">
+              All wishlist pieces
+            </h3>
 
-                <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
-                  {section.description}
-                </p>
-              </div>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--ink-soft)]">
+              Every piece together, ordered by purchase priority and closet
+              impact. Use the filters above when you want to narrow the edit.
+            </p>
+          </div>
 
-              {section.items.length > 0 ? (
-                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                  {section.items.map((item) => (
-                    <WishlistCard key={item.id} item={item} />
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-[3px] border border-dashed border-[var(--line)] bg-[var(--paper-2)] p-10 text-center">
-                  <p className="font-display text-3xl text-[var(--espresso)]">
-                    No pieces in this priority group yet.
-                  </p>
-                  <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[var(--ink-soft)]">
-                    Add a wishlist piece here when you identify a new closet
-                    priority.
-                  </p>
-                </div>
-              )}
-            </section>
-          ))}
-        </div>
+          {filteredItems.length > 0 ? (
+            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+              {filteredItems.map((item) => (
+                <WishlistCard key={item.id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[3px] border border-dashed border-[var(--line)] bg-[var(--paper-2)] p-10 text-center">
+              <p className="font-display text-3xl text-[var(--espresso)]">
+                No wishlist pieces yet.
+              </p>
+              <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[var(--ink-soft)]">
+                Add a wishlist piece when you identify a new closet priority.
+              </p>
+            </div>
+          )}
+        </section>
       ) : (
         <section>
           <div className="mb-6 border-t border-[var(--line)] pt-7">

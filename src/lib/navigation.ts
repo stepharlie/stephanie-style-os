@@ -8,14 +8,14 @@ export const leftNavigationItems = [
     href: "/wishlist",
   },
   {
-    label: "Outfits",
+    label: "Outfit Board",
     href: "/outfits",
   },
 ];
 
 export const rightNavigationItems = [
   {
-    label: "Planner",
+    label: "Outfit Log",
     href: "/planner",
   },
   {
