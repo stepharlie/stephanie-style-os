@@ -1,4 +1,4 @@
-import type { WishlistItem, WardrobeItem } from "@/types/wardrobe";
+import type { PatternType, WishlistItem, WardrobeItem } from "@/types/wardrobe";
 import { styleProfile as fallbackStyleProfile } from "@/lib/style-profile";
 
 type SupabaseImageRow = {
@@ -14,8 +14,11 @@ type WardrobeItemRow = {
   name: string;
   status: "owned";
   category: WardrobeItem["category"];
+  subcategory?: string | null;
   color_family: WardrobeItem["colorFamily"];
   color_name: string;
+  pattern_type?: PatternType | null;
+  pattern_subtype?: string | null;
   size?: string | null;
   brand?: string | null;
   source?: string | null;
@@ -31,8 +34,11 @@ type WishlistItemRow = {
   name: string;
   status: "wishlist";
   category: WishlistItem["category"];
+  subcategory?: string | null;
   color_family: WishlistItem["colorFamily"];
   color_name: string;
+  pattern_type?: PatternType | null;
+  pattern_subtype?: string | null;
   size?: string | null;
   brand?: string | null;
   source?: string | null;
@@ -90,6 +96,8 @@ export function mapWardrobeItem(row: WardrobeItemRow): WardrobeItem {
     subcategory: row.subcategory ?? undefined,
     colorFamily: row.color_family,
     colorName: row.color_name,
+    patternType: row.pattern_type ?? undefined,
+    patternSubtype: row.pattern_subtype ?? undefined,
     size: row.size ?? undefined,
     brand: row.brand ?? undefined,
     source: row.source ?? undefined,

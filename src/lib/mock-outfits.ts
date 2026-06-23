@@ -18,6 +18,8 @@ export type OutfitPieceSlot =
 
 export type OutfitPiece = {
   id: string;
+  x?: string;
+  y?: string;
   name: string;
   slot: OutfitPieceSlot;
   colorFamily: ColorFamily;

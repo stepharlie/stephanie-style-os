@@ -74,7 +74,7 @@ export function OutfitCollageCard({ look }: OutfitCollageCardProps) {
           {look.vibe}
         </p>
         <h3 className="font-display mt-2 text-[2rem] leading-none text-[var(--espresso)]">
-          {look.name}
+          {look.title}
         </h3>
         <p className="mt-4 text-sm leading-6 text-[var(--ink-soft)]">
           {look.notes}

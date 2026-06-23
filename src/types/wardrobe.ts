@@ -25,6 +25,16 @@ export type ColorFamily =
   | "blue"
   | "statement";
 
+export type PatternType =
+  | "animal_print"
+  | "floral"
+  | "striped"
+  | "polka_dot"
+  | "plaid"
+  | "geometric"
+  | "abstract"
+  | "mixed_print";
+
 export type StyleVibe =
   | "classic"
   | "minimal"
@@ -47,6 +57,8 @@ export type WardrobeItem = {
   subcategory?: string;
   colorFamily: ColorFamily;
   colorName: string;
+  patternType?: PatternType;
+  patternSubtype?: string;
   size?: string;
   brand?: string;
   source?: string;

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type {
   ColorFamily,
+  PatternType,
   StyleVibe,
   WardrobeCategory,
 } from "@/types/wardrobe";
@@ -29,6 +30,8 @@ export async function PATCH(request: Request, context: RouteContext) {
     subcategory?: string;
     colorFamily?: ColorFamily;
     colorName?: string;
+    patternType?: PatternType;
+    patternSubtype?: string;
     size?: string;
     brand?: string;
     notes?: string;
@@ -65,6 +68,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       subcategory: body.subcategory?.trim() || null,
       color_family: colorFamily,
       color_name: colorName,
+      pattern_type: body.patternType || null,
+      pattern_subtype: body.patternSubtype?.trim() || null,
       size: body.size?.trim() || null,
       brand: body.brand?.trim() || null,
       notes: body.notes?.trim() || null,
