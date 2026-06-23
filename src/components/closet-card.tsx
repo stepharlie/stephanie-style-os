@@ -52,6 +52,31 @@ function ClosetCardContent({ item }: { item: WardrobeItem }) {
           {item.vibes.join(" / ")}
         </p>
 
+        {[
+          ["Love", item.loveScore],
+          ["Versatility", item.versatilityScore],
+          ["Fit", item.fitConfidenceScore],
+          ["Capsule", item.capsuleValueScore],
+        ].some(([, score]) => typeof score === "number") ? (
+          <div className="mt-4 grid grid-cols-2 gap-2 text-[0.62rem] uppercase tracking-[0.16em] text-[var(--ink-soft)]">
+            {[
+              ["Love", item.loveScore],
+              ["Vers", item.versatilityScore],
+              ["Fit", item.fitConfidenceScore],
+              ["Caps", item.capsuleValueScore],
+            ].map(([label, score]) =>
+              typeof score === "number" ? (
+                <span
+                  key={label}
+                  className="rounded-full border border-[var(--line)] px-2 py-1 text-center"
+                >
+                  {label} {score}/10
+                </span>
+              ) : null,
+            )}
+          </div>
+        ) : null}
+
         {item.productUrl ? (
           <a
             href={item.productUrl}

@@ -26,6 +26,22 @@ type ClosetItemEditFormProps = {
   onSaved?: (updatedItem: WardrobeItem) => void;
 };
 
+function parseScore(value: FormDataEntryValue | null) {
+  const rawValue = String(value ?? "").trim();
+
+  if (!rawValue) {
+    return null;
+  }
+
+  const parsed = Number(rawValue);
+
+  if (Number.isNaN(parsed)) {
+    return null;
+  }
+
+  return Math.max(0, Math.min(10, Math.round(parsed)));
+}
+
 function withCurrentValue(options: string[], currentValue?: string) {
   if (!currentValue || options.includes(currentValue)) {
     return options;
@@ -111,6 +127,10 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
       notes: String(formData.get("notes") ?? ""),
       stylingNotes: String(formData.get("stylingNotes") ?? ""),
       vibes: formData.getAll("vibes").map(String) as StyleVibe[],
+      loveScore: parseScore(formData.get("loveScore")),
+      versatilityScore: parseScore(formData.get("versatilityScore")),
+      fitConfidenceScore: parseScore(formData.get("fitConfidenceScore")),
+      capsuleValueScore: parseScore(formData.get("capsuleValueScore")),
     };
 
     const response = await fetch(`/api/closet/items/${item.id}`, {
@@ -144,6 +164,10 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
       notes: payload.notes || undefined,
       stylingNotes: payload.stylingNotes || undefined,
       vibes: payload.vibes,
+      loveScore: payload.loveScore ?? undefined,
+      versatilityScore: payload.versatilityScore ?? undefined,
+      fitConfidenceScore: payload.fitConfidenceScore ?? undefined,
+      capsuleValueScore: payload.capsuleValueScore ?? undefined,
     };
 
     if (onSaved) {
@@ -378,6 +402,74 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
             className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
           />
         </label>
+
+        <fieldset className="grid gap-4 rounded-[3px] border border-[var(--line)] bg-[var(--paper)] p-4">
+          <legend className="px-2 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+            Closet scores
+          </legend>
+
+          <div className="grid gap-4 md:grid-cols-4">
+            <label className="grid gap-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
+                Love
+              </span>
+              <input
+                name="loveScore"
+                type="number"
+                min="0"
+                max="10"
+                defaultValue={item.loveScore ?? ""}
+                placeholder="0-10"
+                className="rounded-[3px] border border-[var(--line)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+              />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
+                Versatility
+              </span>
+              <input
+                name="versatilityScore"
+                type="number"
+                min="0"
+                max="10"
+                defaultValue={item.versatilityScore ?? ""}
+                placeholder="0-10"
+                className="rounded-[3px] border border-[var(--line)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+              />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
+                Fit
+              </span>
+              <input
+                name="fitConfidenceScore"
+                type="number"
+                min="0"
+                max="10"
+                defaultValue={item.fitConfidenceScore ?? ""}
+                placeholder="0-10"
+                className="rounded-[3px] border border-[var(--line)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+              />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
+                Capsule
+              </span>
+              <input
+                name="capsuleValueScore"
+                type="number"
+                min="0"
+                max="10"
+                defaultValue={item.capsuleValueScore ?? ""}
+                placeholder="0-10"
+                className="rounded-[3px] border border-[var(--line)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+              />
+            </label>
+          </div>
+        </fieldset>
 
         <label className="grid gap-2">
           <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">

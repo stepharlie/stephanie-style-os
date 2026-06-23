@@ -26,6 +26,10 @@ type WardrobeItemRow = {
   notes?: string | null;
   styling_notes?: string | null;
   vibes?: WardrobeItem["vibes"] | null;
+  love_score?: number | null;
+  versatility_score?: number | null;
+  fit_confidence_score?: number | null;
+  capsule_value_score?: number | null;
   wardrobe_item_images?: SupabaseImageRow[] | null;
 };
 
@@ -104,6 +108,10 @@ export function mapWardrobeItem(row: WardrobeItemRow): WardrobeItem {
     productUrl: row.product_url ?? undefined,
     imageUrl: primaryImageUrl(row.wardrobe_item_images),
     vibes: row.vibes ?? [],
+    loveScore: row.love_score ?? undefined,
+    versatilityScore: row.versatility_score ?? undefined,
+    fitConfidenceScore: row.fit_confidence_score ?? undefined,
+    capsuleValueScore: row.capsule_value_score ?? undefined,
     notes: row.notes ?? undefined,
     stylingNotes: row.styling_notes ?? row.notes ?? undefined,
   };

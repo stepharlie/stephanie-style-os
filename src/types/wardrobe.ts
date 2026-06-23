@@ -70,6 +70,10 @@ export type WardrobeItem = {
   productUrl?: string;
   imageUrl?: string;
   vibes: StyleVibe[];
+  loveScore?: number;
+  versatilityScore?: number;
+  fitConfidenceScore?: number;
+  capsuleValueScore?: number;
   notes?: string;
   stylingNotes?: string;
 };

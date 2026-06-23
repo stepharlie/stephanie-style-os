@@ -31,6 +31,14 @@ type RouteContext = {
   }>;
 };
 
+function normalizeScore(value?: number | null) {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return null;
+  }
+
+  return Math.max(0, Math.min(10, Math.round(value)));
+}
+
 export async function PATCH(request: Request, context: RouteContext) {
   const { id } = await context.params;
   const supabase = getSupabaseServerClient();
@@ -56,6 +64,10 @@ export async function PATCH(request: Request, context: RouteContext) {
     notes?: string;
     stylingNotes?: string;
     vibes?: StyleVibe[];
+    loveScore?: number | null;
+    versatilityScore?: number | null;
+    fitConfidenceScore?: number | null;
+    capsuleValueScore?: number | null;
   };
 
   try {
@@ -95,6 +107,10 @@ export async function PATCH(request: Request, context: RouteContext) {
       notes: body.notes?.trim() || null,
       styling_notes: body.stylingNotes?.trim() || null,
       vibes: Array.isArray(body.vibes) ? body.vibes : [],
+      love_score: normalizeScore(body.loveScore),
+      versatility_score: normalizeScore(body.versatilityScore),
+      fit_confidence_score: normalizeScore(body.fitConfidenceScore),
+      capsule_value_score: normalizeScore(body.capsuleValueScore),
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
