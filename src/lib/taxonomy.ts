@@ -63,6 +63,11 @@ export const colorFamilyOptions: ColorFamily[] = [
   "mustard",
   "denim",
   "blue",
+  "pink",
+  "gray",
+  "orange",
+  "metallic",
+  "multicolor",
   "statement",
 ];
 
@@ -107,6 +112,11 @@ export const colorNameByFamily: Record<ColorFamily, string[]> = {
   mustard: ["Mustard", "Golden Mustard", "Ochre", "Gold", "Champagne", "Pale Yellow"],
   denim: ["Denim", "Dark Blue Denim", "Medium Blue Denim", "Light Blue Denim"],
   blue: ["Navy", "Dark Navy", "Blue", "Light Blue", "Electric Blue", "Teal", "Petrol"],
+  pink: ["Pink", "Blush Pink", "Rose", "Dusty Pink"],
+  gray: ["Gray", "Heather Gray", "Light Gray", "Charcoal"],
+  orange: ["Orange", "Rust Orange", "Terracotta"],
+  metallic: ["Gold", "Silver", "Champagne"],
+  multicolor: ["Multicolor", "Pattern", "Cow Print", "Floral Print"],
   statement: [
     "Gold",
     "Silver",

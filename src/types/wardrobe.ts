@@ -23,6 +23,11 @@ export type ColorFamily =
   | "mustard"
   | "denim"
   | "blue"
+  | "pink"
+  | "gray"
+  | "orange"
+  | "metallic"
+  | "multicolor"
   | "statement";
 
 export type PatternType =
