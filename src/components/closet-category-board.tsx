@@ -155,7 +155,8 @@ type ClosetCategoryBoardProps = {
   items: WardrobeItem[];
 };
 
-export function ClosetCategoryBoard({ items }: ClosetCategoryBoardProps) {
+export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoardProps) {
+  const [items, setItems] = useState(initialItems);
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("all");
   const [selectedSubcategory, setSelectedSubcategory] = useState("all");
@@ -268,6 +269,15 @@ export function ClosetCategoryBoard({ items }: ClosetCategoryBoardProps) {
     setSelectedSubcategory("all");
     setSelectedColorFamily("all");
     setSelectedColorName("all");
+  }
+
+  function handleItemSaved(updatedItem: WardrobeItem) {
+    setItems((currentItems) =>
+      currentItems.map((item) =>
+        item.id === updatedItem.id ? updatedItem : item,
+      ),
+    );
+    setSavedItemName(updatedItem.name);
   }
 
   return (
@@ -520,7 +530,7 @@ export function ClosetCategoryBoard({ items }: ClosetCategoryBoardProps) {
 
               <ClosetItemEditForm
                 item={selectedItem}
-                onSaved={() => setSavedItemName(selectedItem.name)}
+                onSaved={handleItemSaved}
                 onSavedConfirmation={() => setSelectedItem(null)}
               />
             </div>

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import type {
   ColorFamily,
   StyleVibe,
@@ -13,7 +12,7 @@ import type {
 type ClosetItemEditFormProps = {
   item: WardrobeItem;
   saved?: boolean;
-  onSaved?: () => void;
+  onSaved?: (updatedItem: WardrobeItem) => void;
   onSavedConfirmation?: () => void;
 };
 
@@ -206,7 +205,6 @@ function withCurrentValue(options: string[], currentValue?: string) {
 }
 
 export function ClosetItemEditForm({ item, onSaved, onSavedConfirmation }: ClosetItemEditFormProps) {
-  const router = useRouter();
   const [category, setCategory] = useState<WardrobeCategory>(item.category);
   const [subcategory, setSubcategory] = useState(item.subcategory ?? "");
   const [colorFamily, setColorFamily] = useState<ColorFamily>(item.colorFamily);
@@ -282,10 +280,22 @@ export function ClosetItemEditForm({ item, onSaved, onSavedConfirmation }: Close
       return;
     }
 
-    router.refresh();
+    const updatedItem: WardrobeItem = {
+      ...item,
+      name: payload.name,
+      category: payload.category,
+      subcategory: payload.subcategory || undefined,
+      colorFamily: payload.colorFamily,
+      colorName: payload.colorName,
+      size: payload.size || undefined,
+      brand: payload.brand || undefined,
+      notes: payload.notes || undefined,
+      stylingNotes: payload.stylingNotes || undefined,
+      vibes: payload.vibes,
+    };
 
     if (onSaved) {
-      onSaved();
+      onSaved(updatedItem);
       return;
     }
 
