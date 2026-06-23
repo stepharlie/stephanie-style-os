@@ -1,3 +1,6 @@
+-- Requires 202606230005_expand_color_family_enum.sql to be applied and committed first.
+-- Do not run this migration in the same manual SQL transaction as the enum expansion.
+
 update public.wardrobe_items
 set
   color_family = case

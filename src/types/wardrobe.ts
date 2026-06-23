@@ -67,6 +67,7 @@ export type WardrobeItem = {
   size?: string;
   brand?: string;
   source?: string;
+  productUrl?: string;
   imageUrl?: string;
   vibes: StyleVibe[];
   notes?: string;

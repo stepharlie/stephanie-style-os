@@ -34,6 +34,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     patternSubtype?: string;
     size?: string;
     brand?: string;
+  productUrl?: string;
     notes?: string;
     stylingNotes?: string;
     vibes?: StyleVibe[];
@@ -72,6 +73,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       pattern_subtype: body.patternSubtype?.trim() || null,
       size: body.size?.trim() || null,
       brand: body.brand?.trim() || null,
+      product_url: body.productUrl?.trim() || null,
       notes: body.notes?.trim() || null,
       styling_notes: body.stylingNotes?.trim() || null,
       vibes: Array.isArray(body.vibes) ? body.vibes : [],

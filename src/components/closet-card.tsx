@@ -52,6 +52,18 @@ function ClosetCardContent({ item }: { item: WardrobeItem }) {
           {item.vibes.join(" / ")}
         </p>
 
+        {item.productUrl ? (
+          <a
+            href={item.productUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(event) => event.stopPropagation()}
+            className="mt-4 inline-flex text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--coffee)] underline-offset-4 hover:underline"
+          >
+            Product link
+          </a>
+        ) : null}
+
         <div className="mt-6 border-t border-[var(--line)] pt-5">
           <p className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
             Stylist&apos;s note

@@ -101,6 +101,7 @@ export function mapWardrobeItem(row: WardrobeItemRow): WardrobeItem {
     size: row.size ?? undefined,
     brand: row.brand ?? undefined,
     source: row.source ?? undefined,
+    productUrl: row.product_url ?? undefined,
     imageUrl: primaryImageUrl(row.wardrobe_item_images),
     vibes: row.vibes ?? [],
     notes: row.notes ?? undefined,

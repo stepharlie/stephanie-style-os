@@ -107,6 +107,7 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
       patternSubtype: String(formData.get("patternSubtype") ?? ""),
       size: String(formData.get("size") ?? ""),
       brand: String(formData.get("brand") ?? ""),
+      productUrl: String(formData.get("productUrl") ?? ""),
       notes: String(formData.get("notes") ?? ""),
       stylingNotes: String(formData.get("stylingNotes") ?? ""),
       vibes: formData.getAll("vibes").map(String) as StyleVibe[],
@@ -139,6 +140,7 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
       patternSubtype: payload.patternSubtype || undefined,
       size: payload.size || undefined,
       brand: payload.brand || undefined,
+      productUrl: payload.productUrl || undefined,
       notes: payload.notes || undefined,
       stylingNotes: payload.stylingNotes || undefined,
       vibes: payload.vibes,
@@ -362,6 +364,19 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
             ))}
           </div>
         </fieldset>
+
+        <label className="grid gap-2">
+          <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+            Product URL
+          </span>
+          <input
+            name="productUrl"
+            type="url"
+            defaultValue={item.productUrl ?? ""}
+            placeholder="https://..."
+            className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+          />
+        </label>
 
         <label className="grid gap-2">
           <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
