@@ -35,7 +35,7 @@ export default async function ClosetPage() {
         </div>
       </PageHeader>
 
-      <ClosetCategoryBoard />
+      <ClosetCategoryBoard items={mockOwnedItems} />
     </>
   );
 }

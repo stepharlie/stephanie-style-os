@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { ClosetCard } from "@/components/closet-card";
-import type { WardrobeCategory } from "@/types/wardrobe";
-import { mockOwnedItems } from "@/lib/mock-owned-items";
+import type { WardrobeCategory, WardrobeItem } from "@/types/wardrobe";
 
 type CategoryFilter = WardrobeCategory | "all";
 
@@ -59,12 +58,6 @@ const categoryFilters: {
   },
 ];
 
-function getCategoryCount(category: CategoryFilter) {
-  if (category === "all") return mockOwnedItems.length;
-
-  return mockOwnedItems.filter((item) => item.category === category).length;
-}
-
 function formatCategory(category: CategoryFilter) {
   if (category === "all") return "All owned pieces";
 
@@ -103,14 +96,24 @@ function selectedCategoryDescription(category: CategoryFilter) {
   return "Pieces in this category, separated from wishlist and ready to wear.";
 }
 
-export function ClosetCategoryBoard() {
+type ClosetCategoryBoardProps = {
+  items: WardrobeItem[];
+};
+
+export function ClosetCategoryBoard({ items }: ClosetCategoryBoardProps) {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("all");
 
+  const getCategoryCount = (category: CategoryFilter) => {
+    if (category === "all") return items.length;
+
+    return items.filter((item) => item.category === category).length;
+  };
+
   const visibleItems =
     selectedCategory === "all"
-      ? mockOwnedItems
-      : mockOwnedItems.filter((item) => item.category === selectedCategory);
+      ? items
+      : items.filter((item) => item.category === selectedCategory);
 
   const selectedFilter = categoryFilters.find(
     (filter) => filter.value === selectedCategory,
@@ -130,7 +133,7 @@ export function ClosetCategoryBoard() {
           </p>
         </div>
 
-        <button className="w-fit text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[var(--caramel)]">
+        <button className="w-fit text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[var(--coffee)]">
           + Add Piece
         </button>
       </div>
@@ -162,7 +165,14 @@ export function ClosetCategoryBoard() {
                   ].join(" ")}
                 >
                   {filter.label}
-                  <sup className="ml-1 align-super text-[0.62rem] not-italic text-[var(--caramel-soft)]">
+                  <sup
+                    className={[
+                      "ml-1.5 align-super text-[0.8rem] font-semibold leading-none not-italic transition",
+                      isActive
+                        ? "text-[var(--espresso)]"
+                        : "text-[var(--caramel-soft)] group-hover:text-[var(--espresso)]",
+                    ].join(" ")}
+                  >
                     {count}
                   </sup>
                 </span>
