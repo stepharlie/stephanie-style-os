@@ -59,40 +59,68 @@ export function AtelierPlaceholder({
       <div className="absolute -left-10 top-6 h-40 w-40 rounded-full border border-white/30" />
       <div className="absolute -bottom-12 -right-10 h-44 w-44 rounded-full border border-black/10" />
 
-      <div className="relative flex h-full min-h-full flex-col justify-between p-5">
-        <div className="flex items-start justify-between gap-4">
-          <span
-            className="rounded-full border border-white/35 bg-white/20 px-3 py-1 text-[0.52rem] font-semibold uppercase tracking-[0.2em] backdrop-blur"
-            style={{ color: tone.ink }}
-          >
-            {category ?? "Piece"}
-          </span>
-          <span
-            className="font-display text-3xl leading-none opacity-80"
-            style={{ color: tone.ink }}
-          >
-            {initials}
-          </span>
-        </div>
-
-        <div>
-          <div className="mb-4 h-px w-16 bg-white/45" />
-          <p
-            className={`font-display leading-[0.95] ${compact ? "text-2xl" : "text-4xl"}`}
-            style={{ color: tone.ink }}
-          >
-            {name}
-          </p>
-          {colorName ? (
-            <p
-              className="mt-3 text-[0.58rem] font-semibold uppercase tracking-[0.22em] opacity-85"
+      {compact ? (
+        <div className="relative flex h-full min-h-full flex-col justify-between p-3">
+          <div className="flex items-start justify-between gap-2">
+            <span
+              className="rounded-full border border-white/35 bg-white/20 px-2 py-1 text-[0.44rem] font-semibold uppercase tracking-[0.16em] backdrop-blur"
               style={{ color: tone.ink }}
             >
-              {colorName}
-            </p>
-          ) : null}
+              {category ?? "Piece"}
+            </span>
+            <span
+              className="font-display text-2xl leading-none opacity-80"
+              style={{ color: tone.ink }}
+            >
+              {initials}
+            </span>
+          </div>
+
+          <div>
+            <div className="mb-2 h-px w-10 bg-white/45" />
+            {colorName ? (
+              <p
+                className="text-[0.48rem] font-semibold uppercase tracking-[0.16em] opacity-85"
+                style={{ color: tone.ink }}
+              >
+                {colorName}
+              </p>
+            ) : null}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="relative flex h-full min-h-full flex-col justify-between p-5">
+          <div className="flex items-start justify-between gap-4">
+            <span
+              className="rounded-full border border-white/35 bg-white/20 px-3 py-1 text-[0.52rem] font-semibold uppercase tracking-[0.2em] backdrop-blur"
+              style={{ color: tone.ink }}
+            >
+              {category ?? "Piece"}
+            </span>
+            <span
+              className="font-display text-3xl leading-none opacity-80"
+              style={{ color: tone.ink }}
+            >
+              {initials}
+            </span>
+          </div>
+
+          <div>
+            <div className="mb-4 h-px w-16 bg-white/45" />
+            <p className="font-display text-4xl leading-[0.95]" style={{ color: tone.ink }}>
+              {name}
+            </p>
+            {colorName ? (
+              <p
+                className="mt-3 text-[0.58rem] font-semibold uppercase tracking-[0.22em] opacity-85"
+                style={{ color: tone.ink }}
+              >
+                {colorName}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

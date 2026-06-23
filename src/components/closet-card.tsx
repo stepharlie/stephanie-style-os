@@ -5,27 +5,12 @@ type ClosetCardProps = {
   item: WardrobeItem;
 };
 
-const styledLookCountById: Record<string, number> = {
-  "owned-001": 8,
-  "owned-002": 7,
-  "owned-003": 4,
-  "owned-004": 6,
-  "owned-005": 3,
-  "owned-016": 9,
-  "owned-017": 8,
-  "owned-018": 7,
-  "owned-019": 5,
-  "owned-023": 6,
-  "owned-026": 5,
-  "owned-028": 10,
-};
 
 function formatCategory(category: string) {
   return category.replace("-", " ");
 }
 
 export function ClosetCard({ item }: ClosetCardProps) {
-  const styledCount = styledLookCountById[item.id] ?? Math.max(2, item.vibes.length + 2);
 
   return (
     <article className="group overflow-hidden rounded-[4px] border border-[var(--line)] bg-[var(--paper)] shadow-[0_18px_60px_rgba(74,47,34,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(74,47,34,0.1)]">
@@ -59,9 +44,7 @@ export function ClosetCard({ item }: ClosetCardProps) {
           </div>
 
           <p className="shrink-0 pt-1 text-right text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--coffee)]">
-            Styled
-            <br />
-            {styledCount}x
+            Curated
           </p>
         </div>
 
