@@ -531,7 +531,6 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
               <ClosetItemEditForm
                 item={selectedItem}
                 onSaved={handleItemSaved}
-                onSavedConfirmation={() => setSelectedItem(null)}
               />
             </div>
           </div>

@@ -11,9 +11,7 @@ import type {
 
 type ClosetItemEditFormProps = {
   item: WardrobeItem;
-  saved?: boolean;
   onSaved?: (updatedItem: WardrobeItem) => void;
-  onSavedConfirmation?: () => void;
 };
 
 const categoryOptions: WardrobeCategory[] = [
@@ -204,7 +202,7 @@ function withCurrentValue(options: string[], currentValue?: string) {
   return [currentValue, ...options];
 }
 
-export function ClosetItemEditForm({ item, onSaved, onSavedConfirmation }: ClosetItemEditFormProps) {
+export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
   const [category, setCategory] = useState<WardrobeCategory>(item.category);
   const [subcategory, setSubcategory] = useState(item.subcategory ?? "");
   const [colorFamily, setColorFamily] = useState<ColorFamily>(item.colorFamily);
@@ -302,19 +300,7 @@ export function ClosetItemEditForm({ item, onSaved, onSavedConfirmation }: Close
     setSaveStatus("saved");
   }
 
-  function handleSavedConfirmation() {
-    if (onSavedConfirmation) {
-      onSavedConfirmation();
-      return;
-    }
 
-    if (window.history.length > 1) {
-      router.back();
-      return;
-    }
-
-    router.push("/closet");
-  }
 
   return (
     <section className="rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-7">
@@ -331,27 +317,6 @@ export function ClosetItemEditForm({ item, onSaved, onSavedConfirmation }: Close
       {saveStatus === "error" ? (
         <div className="mt-6 rounded-[3px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
           {errorMessage}
-        </div>
-      ) : null}
-
-      {saveStatus === "saved" ? (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[rgba(46,31,24,0.38)] px-6 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-[6px] border border-[var(--line)] bg-[var(--paper)] p-7 text-center shadow-[0_32px_100px_rgba(46,31,24,0.28)]">
-            <p className="eyebrow mb-3">Saved</p>
-            <h3 className="font-display text-4xl leading-none text-[var(--espresso)]">
-              Changes saved successfully.
-            </h3>
-            <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-[var(--ink-soft)]">
-              Your closet item was updated and your wardrobe data is now cleaner.
-            </p>
-            <button
-              type="button"
-              onClick={handleSavedConfirmation}
-              className="mt-7 rounded-full border border-[var(--espresso)] bg-[var(--espresso)] px-6 py-3 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white"
-            >
-              OK
-            </button>
-          </div>
         </div>
       ) : null}
 
