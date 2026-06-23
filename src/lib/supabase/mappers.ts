@@ -78,7 +78,7 @@ function primaryImageUrl(images?: SupabaseImageRow[] | null) {
     images.find((image) => image.is_primary) ??
     [...images].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))[0];
 
-  return primary?.image_url ?? undefined;
+  return primary?.image_url ?? primary?.image_path ?? undefined;
 }
 
 export function mapWardrobeItem(row: WardrobeItemRow): WardrobeItem {
