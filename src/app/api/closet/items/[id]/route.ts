@@ -7,6 +7,24 @@ import type {
   WardrobeCategory,
 } from "@/types/wardrobe";
 
+function normalizeProductUrl(value?: string) {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith("www.")) {
+    return `https://${trimmed}`;
+  }
+
+  return trimmed;
+}
+
 type RouteContext = {
   params: Promise<{
     id: string;
@@ -73,7 +91,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       pattern_subtype: body.patternSubtype?.trim() || null,
       size: body.size?.trim() || null,
       brand: body.brand?.trim() || null,
-      product_url: body.productUrl?.trim() || null,
+      product_url: normalizeProductUrl(body.productUrl),
       notes: body.notes?.trim() || null,
       styling_notes: body.stylingNotes?.trim() || null,
       vibes: Array.isArray(body.vibes) ? body.vibes : [],

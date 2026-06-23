@@ -371,7 +371,8 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
           </span>
           <input
             name="productUrl"
-            type="url"
+            type="text"
+            inputMode="url"
             defaultValue={item.productUrl ?? ""}
             placeholder="https://..."
             className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
