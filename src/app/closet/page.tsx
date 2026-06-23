@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ClosetCategoryBoard } from "@/components/closet-category-board";
 import { PageHeader } from "@/components/page-header";
-import { mockOwnedItems } from "@/lib/mock-owned-items";
+import { getWardrobeItems } from "@/lib/wardrobe/data";
 
-export default function ClosetPage() {
+export default async function ClosetPage() {
+  const mockOwnedItems = await getWardrobeItems();
   return (
     <>
       <PageHeader
