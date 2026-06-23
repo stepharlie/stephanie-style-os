@@ -5,9 +5,18 @@ import { ClosetCard } from "@/components/closet-card";
 import { ClosetItemEditForm } from "@/components/closet-item-edit-form";
 import type {
   ColorFamily,
+  PatternType,
   WardrobeCategory,
   WardrobeItem,
 } from "@/types/wardrobe";
+import {
+  colorFamilyOptions,
+  formatLabel,
+  getPatternSubtypeOptions,
+  getSubcategoryOptions,
+  normalizeLabel,
+  patternTypeOptions,
+} from "@/lib/taxonomy";
 
 type CategoryFilter = WardrobeCategory | "all";
 type ColorFamilyFilter = ColorFamily | "all";
@@ -69,49 +78,29 @@ const colorFamilyFilters: {
   label: string;
 }[] = [
   { value: "all", label: "All colors" },
-  { value: "black", label: "Black" },
-  { value: "brown", label: "Brown" },
-  { value: "cream", label: "Cream" },
-  { value: "beige", label: "Beige" },
-  { value: "white", label: "White" },
-  { value: "burgundy", label: "Burgundy" },
-  { value: "olive", label: "Olive" },
-  { value: "camel", label: "Camel" },
-  { value: "plum", label: "Plum" },
-  { value: "mustard", label: "Yellow" },
-  { value: "denim", label: "Denim" },
-  { value: "blue", label: "Blue" },
-  { value: "statement", label: "Statement" },
+  ...colorFamilyOptions.map((colorFamily) => ({
+    value: colorFamily,
+    label: formatLabel(colorFamily),
+  })),
 ];
 
-const fallbackSubcategoriesByCategory: Record<WardrobeCategory, string[]> = {
-  top: [
-    "Bodysuit",
-    "Tank",
-    "Camisole",
-    "Crop Top",
-    "Button-Down",
-    "Blouse",
-    "T-Shirt",
-    "Vest",
-    "Cardigan",
-  ],
-  bottom: ["Pants", "Jeans", "Shorts", "Skirt", "Wide Leg", "Straight Leg"],
-  dress: ["Dress", "Jumpsuit", "Set"],
-  outerwear: ["Blazer", "Vest", "Jacket", "Cardigan", "Layer"],
-  shoes: ["Loafer", "Mule", "Sandal", "Sneaker", "Heel", "Flat", "Boot"],
-  bag: ["Tote", "Shoulder Bag", "Crossbody", "Clutch"],
-  accessory: ["Belt", "Scarf", "Glasses", "Sunglasses", "Hair Accessory"],
-  jewelry: ["Earrings", "Bracelet", "Ring", "Necklace", "Watch"],
-};
+type PatternTypeFilter = PatternType | "all";
+type PatternSubtypeFilter = string | "all";
 
-function normalizeLabel(value: string) {
-  return value
-    .replaceAll("_", " ")
-    .replaceAll("-", " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+const patternTypeFilters: {
+  value: PatternTypeFilter;
+  label: string;
+}[] = [
+  { value: "all", label: "All patterns" },
+  ...patternTypeOptions
+    .filter((option) => option.value)
+    .map((option) => ({
+      value: option.value as PatternType,
+      label: option.label,
+    })),
+];
+
+
 
 function formatCategory(category: CategoryFilter) {
   if (category === "all") return "All owned pieces";
@@ -163,6 +152,10 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
   const [selectedColorFamily, setSelectedColorFamily] =
     useState<ColorFamilyFilter>("all");
   const [selectedColorName, setSelectedColorName] = useState("all");
+  const [selectedPatternType, setSelectedPatternType] =
+    useState<PatternTypeFilter>("all");
+  const [selectedPatternSubtype, setSelectedPatternSubtype] =
+    useState<PatternSubtypeFilter>("all");
   const [selectedItem, setSelectedItem] = useState<WardrobeItem | null>(null);
   const [savedItemName, setSavedItemName] = useState<string | null>(null);
 
@@ -177,12 +170,29 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       .filter((value): value is string => Boolean(value))
       .map(normalizeLabel);
 
-    const fallback = fallbackSubcategoriesByCategory[selectedCategory] ?? [];
+    const fallback = getSubcategoryOptions(selectedCategory);
 
     return Array.from(new Set([...fromItems, ...fallback])).sort((a, b) =>
       a.localeCompare(b),
     );
   }, [items, selectedCategory]);
+
+  const availablePatternSubtypes = useMemo(() => {
+    if (selectedPatternType === "all") {
+      return [];
+    }
+
+    const fromItems = items
+      .filter((item) => item.patternType === selectedPatternType)
+      .map((item) => item.patternSubtype)
+      .filter((value): value is string => Boolean(value));
+
+    const fallback = getPatternSubtypeOptions(selectedPatternType);
+
+    return Array.from(new Set([...fromItems, ...fallback])).sort((a, b) =>
+      a.localeCompare(b),
+    );
+  }, [items, selectedPatternType]);
 
   const availableColorNames = useMemo(() => {
     const filteredItems = items.filter((item) => {
@@ -204,13 +214,34 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
         return false;
       }
 
+      if (
+        selectedPatternType !== "all" &&
+        item.patternType !== selectedPatternType
+      ) {
+        return false;
+      }
+
+      if (
+        selectedPatternSubtype !== "all" &&
+        item.patternSubtype !== selectedPatternSubtype
+      ) {
+        return false;
+      }
+
       return true;
     });
 
     return Array.from(new Set(filteredItems.map((item) => item.colorName)))
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b));
-  }, [items, selectedCategory, selectedSubcategory, selectedColorFamily]);
+  }, [
+    items,
+    selectedCategory,
+    selectedSubcategory,
+    selectedColorFamily,
+    selectedPatternType,
+    selectedPatternSubtype,
+  ]);
 
   const visibleItems = items.filter((item) => {
     if (selectedCategory !== "all" && item.category !== selectedCategory) {
@@ -235,6 +266,20 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       return false;
     }
 
+    if (
+      selectedPatternType !== "all" &&
+      item.patternType !== selectedPatternType
+    ) {
+      return false;
+    }
+
+    if (
+      selectedPatternSubtype !== "all" &&
+      item.patternSubtype !== selectedPatternSubtype
+    ) {
+      return false;
+    }
+
     return true;
   });
 
@@ -252,7 +297,9 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     selectedCategory !== "all" ||
     selectedSubcategory !== "all" ||
     selectedColorFamily !== "all" ||
-    selectedColorName !== "all";
+    selectedColorName !== "all" ||
+    selectedPatternType !== "all" ||
+    selectedPatternSubtype !== "all";
 
   function handleCategoryChange(category: CategoryFilter) {
     setSelectedCategory(category);
@@ -264,11 +311,18 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     setSelectedColorName("all");
   }
 
+  function handlePatternTypeChange(patternType: PatternTypeFilter) {
+    setSelectedPatternType(patternType);
+    setSelectedPatternSubtype("all");
+  }
+
   function clearFilters() {
     setSelectedCategory("all");
     setSelectedSubcategory("all");
     setSelectedColorFamily("all");
     setSelectedColorName("all");
+    setSelectedPatternType("all");
+    setSelectedPatternSubtype("all");
   }
 
   function handleItemSaved(updatedItem: WardrobeItem) {
@@ -353,7 +407,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       </div>
 
       <div className="mb-8 rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-5">
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
           <label className="grid gap-2">
             <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
               Category
@@ -427,6 +481,48 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
               {availableColorNames.map((colorName) => (
                 <option key={colorName} value={colorName}>
                   {colorName}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Pattern type
+            </span>
+            <select
+              value={selectedPatternType}
+              onChange={(event) =>
+                handlePatternTypeChange(event.target.value as PatternTypeFilter)
+              }
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+            >
+              {patternTypeFilters.map((filter) => (
+                <option key={filter.value} value={filter.value}>
+                  {filter.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Pattern subtype
+            </span>
+            <select
+              value={selectedPatternSubtype}
+              onChange={(event) => setSelectedPatternSubtype(event.target.value)}
+              disabled={selectedPatternType === "all"}
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)] disabled:opacity-45"
+            >
+              <option value="all">
+                {selectedPatternType === "all"
+                  ? "Choose pattern first"
+                  : "All subtypes"}
+              </option>
+              {availablePatternSubtypes.map((subtype) => (
+                <option key={subtype} value={subtype}>
+                  {subtype}
                 </option>
               ))}
             </select>
