@@ -1,10 +1,11 @@
 import { PageHeader } from "@/components/page-header";
 import { WishlistPriorityBoard } from "@/components/wishlist-priority-board";
-import { mockWishlistItems } from "@/lib/mock-wishlist-items";
+import { getWishlistItems } from "@/lib/wishlist/data";
 
-const priceWatchCount = mockWishlistItems.filter((item) => item.priceWatch).length;
 
-export default function WishlistPage() {
+export default async function WishlistPage() {
+  const mockWishlistItems = await getWishlistItems();
+  const priceWatchCount = mockWishlistItems.filter((item) => item.priceWatch).length;
   return (
     <>
       <PageHeader
