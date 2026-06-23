@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/page-header";
-import { styleProfile } from "@/lib/style-profile";
+import { getStyleProfile } from "@/lib/profile/data";
 
 const paletteTone: Record<string, string> = {
   black: "#2b241f",
@@ -52,7 +52,8 @@ function RuleCard({ title, body }: { title: string; body: string }) {
   );
 }
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const styleProfile = await getStyleProfile();
   return (
     <main className="pb-16 md:pb-20">
       <PageHeader
