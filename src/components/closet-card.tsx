@@ -1,6 +1,24 @@
 import Link from "next/link";
 import { AtelierPlaceholder } from "@/components/atelier-placeholder";
 import type { WardrobeItem } from "@/types/wardrobe";
+function getClosetScore(item: ClosetCardProps["item"]) {
+  const scores = [
+    item.loveScore,
+    item.versatilityScore,
+    item.fitConfidenceScore,
+    item.capsuleValueScore,
+  ].filter((score): score is number => typeof score === "number");
+
+  if (!scores.length) {
+    return null;
+  }
+
+  const average =
+    scores.reduce((total, score) => total + score, 0) / scores.length;
+
+  return Number(average.toFixed(1));
+}
+
 
 type ClosetCardProps = {
   item: WardrobeItem;
@@ -12,6 +30,7 @@ function formatCategory(category: string) {
 }
 
 function ClosetCardContent({ item }: { item: WardrobeItem }) {
+  const closetScore = getClosetScore(item);
   return (
     <>
       <div className="bg-[var(--paper-2)] p-4">
@@ -51,6 +70,17 @@ function ClosetCardContent({ item }: { item: WardrobeItem }) {
         <p className="mt-5 text-[0.58rem] font-medium uppercase tracking-[0.22em] text-[var(--ink-soft)]">
           {item.vibes.join(" / ")}
         </p>
+
+        {closetScore !== null ? (
+          <div className="mt-4 rounded-[3px] border border-[var(--coffee)] bg-[var(--paper)] px-3 py-2 text-center">
+            <p className="text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Closet Score
+            </p>
+            <p className="mt-1 font-serif text-xl text-[var(--espresso)]">
+              {closetScore}/10
+            </p>
+          </div>
+        ) : null}
 
         {[
           ["Love", item.loveScore],
