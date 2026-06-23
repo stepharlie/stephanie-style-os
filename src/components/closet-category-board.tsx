@@ -21,6 +21,7 @@ import {
 type CategoryFilter = WardrobeCategory | "all";
 type ColorFamilyFilter = ColorFamily | "all";
 type ClosetSort = "default" | "score-high" | "score-low" | "missing-scores";
+type StylingFocus = "all" | "needs-styling" | "complete-scores";
 
 const categoryFilters: {
   value: CategoryFilter;
@@ -169,6 +170,25 @@ function hasAnyClosetScore(item: WardrobeItem) {
   ].some((score) => typeof score === "number");
 }
 
+
+function hasCompleteClosetScores(item: WardrobeItem) {
+  return [
+    item.loveScore,
+    item.versatilityScore,
+    item.fitConfidenceScore,
+    item.capsuleValueScore,
+  ].every((score) => typeof score === "number");
+}
+
+function needsStyling(item: WardrobeItem) {
+  const closetScore = getClosetScore(item);
+
+  return (
+    !hasCompleteClosetScores(item) ||
+    (closetScore !== null && closetScore <= 6.9)
+  );
+}
+
 type ClosetCategoryBoardProps = {
   items: WardrobeItem[];
 };
@@ -186,6 +206,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
   const [selectedPatternSubtype, setSelectedPatternSubtype] =
     useState<PatternSubtypeFilter>("all");
   const [selectedSort, setSelectedSort] = useState<ClosetSort>("default");
+  const [selectedStylingFocus, setSelectedStylingFocus] =
+    useState<StylingFocus>("all");
   const [selectedItem, setSelectedItem] = useState<WardrobeItem | null>(null);
   const [savedItemName, setSavedItemName] = useState<string | null>(null);
 
@@ -310,6 +332,17 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       return false;
     }
 
+    if (selectedStylingFocus === "needs-styling" && !needsStyling(item)) {
+      return false;
+    }
+
+    if (
+      selectedStylingFocus === "complete-scores" &&
+      !hasCompleteClosetScores(item)
+    ) {
+      return false;
+    }
+
     return true;
   });
 
@@ -346,7 +379,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     selectedColorName !== "all" ||
     selectedPatternType !== "all" ||
     selectedPatternSubtype !== "all" ||
-    selectedSort !== "default";
+    selectedSort !== "default" ||
+    selectedStylingFocus !== "all";
 
   function handleCategoryChange(category: CategoryFilter) {
     setSelectedCategory(category);
@@ -371,6 +405,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     setSelectedPatternType("all");
     setSelectedPatternSubtype("all");
     setSelectedSort("default");
+    setSelectedStylingFocus("all");
   }
 
   function handleItemSaved(updatedItem: WardrobeItem) {
@@ -455,7 +490,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       </div>
 
       <div className="mb-8 rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-5">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
           <label className="grid gap-2">
             <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
               Category
@@ -591,6 +626,24 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
               <option value="missing-scores">Missing scores</option>
             </select>
           </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Styling
+            </span>
+            <select
+              value={selectedStylingFocus}
+              onChange={(event) =>
+                setSelectedStylingFocus(event.target.value as StylingFocus)
+              }
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+            >
+              <option value="all">All styling</option>
+              <option value="needs-styling">Needs styling</option>
+              <option value="complete-scores">Complete scores</option>
+            </select>
+          </label>
+
 
         </div>
 
