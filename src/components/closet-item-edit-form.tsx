@@ -4,195 +4,27 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import type {
   ColorFamily,
+  PatternType,
   StyleVibe,
   WardrobeCategory,
   WardrobeItem,
 } from "@/types/wardrobe";
+import {
+  categoryOptions,
+  colorFamilyOptions,
+  colorNameByFamily,
+  formatLabel,
+  getPatternSubtypeOptions,
+  getSizeOptions,
+  getSubcategoryOptions,
+  patternTypeOptions,
+  vibeOptions,
+} from "@/lib/taxonomy";
 
 type ClosetItemEditFormProps = {
   item: WardrobeItem;
   onSaved?: (updatedItem: WardrobeItem) => void;
 };
-
-const categoryOptions: WardrobeCategory[] = [
-  "top",
-  "bottom",
-  "dress",
-  "outerwear",
-  "shoes",
-  "bag",
-  "accessory",
-  "jewelry",
-];
-
-const subcategoryOptionsByCategory: Record<WardrobeCategory, string[]> = {
-  top: [
-    "Sleeveless Top",
-    "Tank",
-    "Camisole",
-    "Crop Top",
-    "Bodysuit",
-    "T-Shirt",
-    "Blouse",
-    "Button Down",
-    "Long Sleeve Top",
-    "Cardigan",
-  ],
-  bottom: [
-    "Straight Leg Pants",
-    "Wide Leg Pants",
-    "Jeans",
-    "Shorts",
-    "Skirt",
-    "Trouser",
-  ],
-  dress: ["Dress", "Jumpsuit", "Romper"],
-  outerwear: ["Blazer", "Jacket", "Vest"],
-  shoes: [
-    "Loafer",
-    "Mule",
-    "Flat",
-    "Sandal",
-    "Heel",
-    "Sneaker",
-    "Boot",
-  ],
-  bag: ["Shoulder Bag", "Crossbody", "Tote", "Clutch"],
-  accessory: ["Belt", "Scarf", "Sunglasses", "Hat"],
-  jewelry: ["Earrings", "Necklace", "Bracelet", "Ring", "Watch"],
-};
-
-const colorFamilyOptions: ColorFamily[] = [
-  "black",
-  "brown",
-  "cream",
-  "beige",
-  "white",
-  "burgundy",
-  "olive",
-  "camel",
-  "plum",
-  "mustard",
-  "denim",
-  "blue",
-  "statement",
-];
-
-const colorNameByFamily: Record<ColorFamily, string[]> = {
-  black: ["Black", "Washed Black", "Black/Silver Lurex"],
-  brown: [
-    "Espresso",
-    "Chocolate",
-    "Dark Brown",
-    "Brown",
-    "Cognac",
-    "Leopard Brown",
-    "Tortoise",
-    "Amber",
-  ],
-  cream: ["Cream", "Ivory", "Ivory/Cream", "Warm Cream"],
-  beige: [
-    "Beige",
-    "Taupe",
-    "Light Taupe",
-    "Beige/Oatmeal",
-    "Cream/Beige",
-    "Natural",
-    "Nude",
-    "Sand",
-    "Warm Beige",
-  ],
-  white: ["White", "Off White"],
-  burgundy: ["Burgundy", "Wine", "Oxblood", "Deep Red", "Red", "True Red"],
-  olive: [
-    "Olive",
-    "Dark Olive",
-    "Forest Green",
-    "Moss",
-    "Emerald Green",
-    "Deep Teal",
-    "Sage Green",
-    "Teal",
-  ],
-  camel: ["Camel", "Caramel", "Warm Tan"],
-  plum: ["Plum", "Eggplant", "Mauve"],
-  mustard: ["Mustard", "Golden Mustard", "Ochre", "Gold", "Champagne", "Pale Yellow"],
-  denim: ["Denim", "Dark Blue Denim", "Medium Blue Denim", "Light Blue Denim"],
-  blue: ["Navy", "Dark Navy", "Blue", "Light Blue", "Electric Blue", "Teal", "Petrol"],
-  statement: [
-    "Gold",
-    "Silver",
-    "Leopard",
-    "Cow Print",
-    "Snake Print",
-    "Multicolor",
-    "Print",
-    "Pattern",
-    "Heather Gray",
-    "Light Gray",
-    "Gray",
-    "Charcoal",
-    "Pink",
-    "Blush Pink",
-    "Orange",
-    "Clear",
-  ],
-};
-
-const clothingSizeOptions = [
-  "XXS",
-  "XS",
-  "Small",
-  "Medium",
-  "Large",
-  "XLarge",
-  "XXLarge",
-  "One Size",
-];
-
-const shoeSizeOptions = [
-  "5",
-  "5.5",
-  "6",
-  "6.5",
-  "7",
-  "7.5",
-  "8",
-  "8.5",
-  "9",
-  "9.5",
-  "10",
-];
-
-const oneSizeOptions = ["One Size"];
-
-const vibeOptions: StyleVibe[] = [
-  "classic",
-  "minimal",
-  "elevated",
-  "work",
-  "tropical",
-  "statement",
-  "casual",
-];
-
-function formatLabel(value: string) {
-  return value.replaceAll("-", " ");
-}
-
-function getSubcategoryOptions(category: WardrobeCategory) {
-  return subcategoryOptionsByCategory[category] ?? [];
-}
-
-function getSizeOptions(category: WardrobeCategory) {
-  if (category === "shoes") return shoeSizeOptions;
-
-  if (category === "bag" || category === "accessory" || category === "jewelry") {
-    return oneSizeOptions;
-  }
-
-  return clothingSizeOptions;
-}
 
 function withCurrentValue(options: string[], currentValue?: string) {
   if (!currentValue || options.includes(currentValue)) {
@@ -207,6 +39,8 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
   const [subcategory, setSubcategory] = useState(item.subcategory ?? "");
   const [colorFamily, setColorFamily] = useState<ColorFamily>(item.colorFamily);
   const [colorName, setColorName] = useState(item.colorName);
+  const [patternType, setPatternType] = useState<PatternType | "">(item.patternType ?? "");
+  const [patternSubtype, setPatternSubtype] = useState(item.patternSubtype ?? "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
   );
@@ -227,12 +61,26 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
     [colorFamily, colorName],
   );
 
+  const patternSubtypeOptions = useMemo(
+    () => withCurrentValue(getPatternSubtypeOptions(patternType), patternSubtype),
+    [patternType, patternSubtype],
+  );
+
   function handleCategoryChange(nextCategory: WardrobeCategory) {
     setCategory(nextCategory);
     const nextOptions = getSubcategoryOptions(nextCategory);
 
     if (!nextOptions.includes(subcategory)) {
       setSubcategory(nextOptions[0] ?? "");
+    }
+  }
+
+  function handlePatternTypeChange(nextPatternType: PatternType | "") {
+    setPatternType(nextPatternType);
+
+    const nextOptions = getPatternSubtypeOptions(nextPatternType);
+    if (!nextPatternType || !nextOptions.includes(patternSubtype)) {
+      setPatternSubtype(nextOptions[0] ?? "");
     }
   }
 
@@ -255,6 +103,8 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
       subcategory: String(formData.get("subcategory") ?? ""),
       colorFamily: String(formData.get("colorFamily") ?? "") as ColorFamily,
       colorName: String(formData.get("colorName") ?? ""),
+      patternType: String(formData.get("patternType") ?? "") as PatternType | "",
+      patternSubtype: String(formData.get("patternSubtype") ?? ""),
       size: String(formData.get("size") ?? ""),
       brand: String(formData.get("brand") ?? ""),
       notes: String(formData.get("notes") ?? ""),
@@ -285,6 +135,8 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
       subcategory: payload.subcategory || undefined,
       colorFamily: payload.colorFamily,
       colorName: payload.colorName,
+      patternType: payload.patternType || undefined,
+      patternSubtype: payload.patternSubtype || undefined,
       size: payload.size || undefined,
       brand: payload.brand || undefined,
       notes: payload.notes || undefined,
@@ -428,6 +280,50 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
               {colorNameOptions.map((color) => (
                 <option key={color} value={color}>
                   {color}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Pattern type
+            </span>
+            <select
+              name="patternType"
+              value={patternType}
+              onChange={(event) =>
+                handlePatternTypeChange(event.target.value as PatternType | "")
+              }
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+            >
+              {patternTypeOptions.map((option) => (
+                <option key={option.value || "solid"} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Pattern subtype
+            </span>
+            <select
+              name="patternSubtype"
+              value={patternSubtype}
+              onChange={(event) => setPatternSubtype(event.target.value)}
+              disabled={!patternType}
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)] disabled:opacity-45"
+            >
+              <option value="">
+                {!patternType ? "Choose pattern type first" : "Not set"}
+              </option>
+              {patternSubtypeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
                 </option>
               ))}
             </select>

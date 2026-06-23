@@ -1,6 +1,7 @@
 import type {
   ColorFamily,
   PatternType,
+  StyleVibe,
   WardrobeCategory,
 } from "@/types/wardrobe";
 
@@ -152,6 +153,16 @@ export const shoeSizeOptions = [
 ];
 
 export const oneSizeOptions = ["One Size"];
+
+export const vibeOptions: StyleVibe[] = [
+  "classic",
+  "minimal",
+  "elevated",
+  "work",
+  "tropical",
+  "statement",
+  "casual",
+];
 
 export const patternTypeOptions: {
   value: PatternType | "";
