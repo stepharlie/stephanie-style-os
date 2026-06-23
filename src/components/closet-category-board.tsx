@@ -1,10 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ClosetCard } from "@/components/closet-card";
-import type { WardrobeCategory, WardrobeItem } from "@/types/wardrobe";
+import { ClosetItemEditForm } from "@/components/closet-item-edit-form";
+import type {
+  ColorFamily,
+  WardrobeCategory,
+  WardrobeItem,
+} from "@/types/wardrobe";
 
 type CategoryFilter = WardrobeCategory | "all";
+type ColorFamilyFilter = ColorFamily | "all";
 
 const categoryFilters: {
   value: CategoryFilter;
@@ -58,6 +64,55 @@ const categoryFilters: {
   },
 ];
 
+const colorFamilyFilters: {
+  value: ColorFamilyFilter;
+  label: string;
+}[] = [
+  { value: "all", label: "All colors" },
+  { value: "black", label: "Black" },
+  { value: "brown", label: "Brown" },
+  { value: "cream", label: "Cream" },
+  { value: "beige", label: "Beige" },
+  { value: "white", label: "White" },
+  { value: "burgundy", label: "Burgundy" },
+  { value: "olive", label: "Olive" },
+  { value: "camel", label: "Camel" },
+  { value: "plum", label: "Plum" },
+  { value: "mustard", label: "Yellow" },
+  { value: "denim", label: "Denim" },
+  { value: "blue", label: "Blue" },
+  { value: "statement", label: "Statement" },
+];
+
+const fallbackSubcategoriesByCategory: Record<WardrobeCategory, string[]> = {
+  top: [
+    "Bodysuit",
+    "Tank",
+    "Camisole",
+    "Crop Top",
+    "Button-Down",
+    "Blouse",
+    "T-Shirt",
+    "Vest",
+    "Cardigan",
+  ],
+  bottom: ["Pants", "Jeans", "Shorts", "Skirt", "Wide Leg", "Straight Leg"],
+  dress: ["Dress", "Jumpsuit", "Set"],
+  outerwear: ["Blazer", "Vest", "Jacket", "Cardigan", "Layer"],
+  shoes: ["Loafer", "Mule", "Sandal", "Sneaker", "Heel", "Flat", "Boot"],
+  bag: ["Tote", "Shoulder Bag", "Crossbody", "Clutch"],
+  accessory: ["Belt", "Scarf", "Glasses", "Sunglasses", "Hair Accessory"],
+  jewelry: ["Earrings", "Bracelet", "Ring", "Necklace", "Watch"],
+};
+
+function normalizeLabel(value: string) {
+  return value
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function formatCategory(category: CategoryFilter) {
   if (category === "all") return "All owned pieces";
 
@@ -103,6 +158,84 @@ type ClosetCategoryBoardProps = {
 export function ClosetCategoryBoard({ items }: ClosetCategoryBoardProps) {
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("all");
+  const [selectedColorFamily, setSelectedColorFamily] =
+    useState<ColorFamilyFilter>("all");
+  const [selectedColorName, setSelectedColorName] = useState("all");
+  const [selectedItem, setSelectedItem] = useState<WardrobeItem | null>(null);
+  const [savedItemName, setSavedItemName] = useState<string | null>(null);
+
+  const availableSubcategories = useMemo(() => {
+    if (selectedCategory === "all") {
+      return [];
+    }
+
+    const fromItems = items
+      .filter((item) => item.category === selectedCategory)
+      .map((item) => item.subcategory)
+      .filter((value): value is string => Boolean(value))
+      .map(normalizeLabel);
+
+    const fallback = fallbackSubcategoriesByCategory[selectedCategory] ?? [];
+
+    return Array.from(new Set([...fromItems, ...fallback])).sort((a, b) =>
+      a.localeCompare(b),
+    );
+  }, [items, selectedCategory]);
+
+  const availableColorNames = useMemo(() => {
+    const filteredItems = items.filter((item) => {
+      if (selectedCategory !== "all" && item.category !== selectedCategory) {
+        return false;
+      }
+
+      if (
+        selectedSubcategory !== "all" &&
+        normalizeLabel(item.subcategory ?? "") !== selectedSubcategory
+      ) {
+        return false;
+      }
+
+      if (
+        selectedColorFamily !== "all" &&
+        item.colorFamily !== selectedColorFamily
+      ) {
+        return false;
+      }
+
+      return true;
+    });
+
+    return Array.from(new Set(filteredItems.map((item) => item.colorName)))
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b));
+  }, [items, selectedCategory, selectedSubcategory, selectedColorFamily]);
+
+  const visibleItems = items.filter((item) => {
+    if (selectedCategory !== "all" && item.category !== selectedCategory) {
+      return false;
+    }
+
+    if (
+      selectedSubcategory !== "all" &&
+      normalizeLabel(item.subcategory ?? "") !== selectedSubcategory
+    ) {
+      return false;
+    }
+
+    if (
+      selectedColorFamily !== "all" &&
+      item.colorFamily !== selectedColorFamily
+    ) {
+      return false;
+    }
+
+    if (selectedColorName !== "all" && item.colorName !== selectedColorName) {
+      return false;
+    }
+
+    return true;
+  });
 
   const getCategoryCount = (category: CategoryFilter) => {
     if (category === "all") return items.length;
@@ -110,14 +243,32 @@ export function ClosetCategoryBoard({ items }: ClosetCategoryBoardProps) {
     return items.filter((item) => item.category === category).length;
   };
 
-  const visibleItems =
-    selectedCategory === "all"
-      ? items
-      : items.filter((item) => item.category === selectedCategory);
-
   const selectedFilter = categoryFilters.find(
     (filter) => filter.value === selectedCategory,
   );
+
+  const hasActiveFilters =
+    selectedCategory !== "all" ||
+    selectedSubcategory !== "all" ||
+    selectedColorFamily !== "all" ||
+    selectedColorName !== "all";
+
+  function handleCategoryChange(category: CategoryFilter) {
+    setSelectedCategory(category);
+    setSelectedSubcategory("all");
+  }
+
+  function handleColorFamilyChange(colorFamily: ColorFamilyFilter) {
+    setSelectedColorFamily(colorFamily);
+    setSelectedColorName("all");
+  }
+
+  function clearFilters() {
+    setSelectedCategory("all");
+    setSelectedSubcategory("all");
+    setSelectedColorFamily("all");
+    setSelectedColorName("all");
+  }
 
   return (
     <section className="mx-auto max-w-6xl px-6 pb-16 pt-10 md:px-10 md:pb-20 md:pt-12">
@@ -149,7 +300,7 @@ export function ClosetCategoryBoard({ items }: ClosetCategoryBoardProps) {
               <button
                 key={filter.value}
                 type="button"
-                onClick={() => setSelectedCategory(filter.value)}
+                onClick={() => handleCategoryChange(filter.value)}
                 aria-label={`${filter.label}: ${count} pieces`}
                 className={[
                   "group text-left transition",
@@ -191,6 +342,98 @@ export function ClosetCategoryBoard({ items }: ClosetCategoryBoardProps) {
         </div>
       </div>
 
+      <div className="mb-8 rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-5">
+        <div className="grid gap-4 md:grid-cols-4">
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Category
+            </span>
+            <select
+              value={selectedCategory}
+              onChange={(event) =>
+                handleCategoryChange(event.target.value as CategoryFilter)
+              }
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+            >
+              {categoryFilters.map((filter) => (
+                <option key={filter.value} value={filter.value}>
+                  {filter.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Type
+            </span>
+            <select
+              value={selectedSubcategory}
+              onChange={(event) => setSelectedSubcategory(event.target.value)}
+              disabled={selectedCategory === "all"}
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)] disabled:opacity-45"
+            >
+              <option value="all">
+                {selectedCategory === "all" ? "Choose category first" : "All types"}
+              </option>
+              {availableSubcategories.map((subcategory) => (
+                <option key={subcategory} value={subcategory}>
+                  {subcategory}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Color family
+            </span>
+            <select
+              value={selectedColorFamily}
+              onChange={(event) =>
+                handleColorFamilyChange(event.target.value as ColorFamilyFilter)
+              }
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+            >
+              {colorFamilyFilters.map((filter) => (
+                <option key={filter.value} value={filter.value}>
+                  {filter.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Color name
+            </span>
+            <select
+              value={selectedColorName}
+              onChange={(event) => setSelectedColorName(event.target.value)}
+              disabled={availableColorNames.length === 0}
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)] disabled:opacity-45"
+            >
+              <option value="all">All color names</option>
+              {availableColorNames.map((colorName) => (
+                <option key={colorName} value={colorName}>
+                  {colorName}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {hasActiveFilters ? (
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="mt-5 text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-[var(--coffee)]"
+          >
+            Clear filters
+          </button>
+        ) : null}
+      </div>
+
       <div className="mb-6 border-t border-[var(--line)] pt-7">
         <p className="text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[var(--caramel)]">
           {formatCategory(selectedCategory)}
@@ -212,20 +455,104 @@ export function ClosetCategoryBoard({ items }: ClosetCategoryBoardProps) {
       {visibleItems.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {visibleItems.map((item) => (
-            <ClosetCard key={item.id} item={item} />
+            <ClosetCard key={item.id} item={item} onSelect={setSelectedItem} />
           ))}
         </div>
       ) : (
         <div className="rounded-[3px] border border-dashed border-[var(--line)] bg-[var(--paper-2)] p-10 text-center">
           <p className="font-display text-3xl text-[var(--espresso)]">
-            No pieces here yet.
+            No pieces match these filters.
           </p>
           <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[var(--ink-soft)]">
-            This category is empty for now. When you add pieces, they will live
-            here and stay separate from wishlist.
+            Clear filters or choose a broader category/color combination.
           </p>
         </div>
       )}
-    </section>
+    
+      {selectedItem ? (
+        <div
+          className="fixed inset-0 z-40 overflow-y-auto bg-[rgba(46,31,24,0.34)] px-4 py-8 backdrop-blur-sm md:px-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Edit ${selectedItem.name}`}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setSelectedItem(null);
+            }
+          }}
+        >
+          <div className="mx-auto max-w-6xl rounded-[6px] border border-[var(--line)] bg-[var(--paper)] p-4 shadow-[0_30px_100px_rgba(46,31,24,0.22)] md:p-6">
+            <div className="mb-5 flex items-center justify-between gap-4 border-b border-[var(--line)] pb-4">
+              <div>
+                <p className="eyebrow mb-2">Edit closet item</p>
+                <h3 className="font-display text-3xl leading-none text-[var(--espresso)]">
+                  {selectedItem.name}
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedItem(null)}
+                className="rounded-full border border-[var(--line)] px-4 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[var(--coffee)]"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+              <aside className="rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-4">
+                {selectedItem.imageUrl ? (
+                  <div
+                    className="min-h-[32rem] rounded-[3px] bg-[var(--paper)] bg-contain bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url(${selectedItem.imageUrl})` }}
+                    aria-label={selectedItem.name}
+                  />
+                ) : (
+                  <div className="flex min-h-[32rem] items-center justify-center rounded-[3px] bg-[var(--paper)] text-sm text-[var(--ink-soft)]">
+                    No photo yet.
+                  </div>
+                )}
+
+                <p className="mt-4 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+                  {selectedItem.category} · {selectedItem.colorName}
+                </p>
+              </aside>
+
+              <ClosetItemEditForm
+                item={selectedItem}
+                onSaved={() => setSavedItemName(selectedItem.name)}
+                onSavedConfirmation={() => setSelectedItem(null)}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+
+      {savedItemName ? (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[rgba(46,31,24,0.38)] px-6 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[6px] border border-[var(--line)] bg-[var(--paper)] p-7 text-center shadow-[0_32px_100px_rgba(46,31,24,0.28)]">
+            <p className="eyebrow mb-3">Saved</p>
+            <h3 className="font-display text-4xl leading-none text-[var(--espresso)]">
+              Changes saved successfully.
+            </h3>
+            <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-[var(--ink-soft)]">
+              {savedItemName} was updated in your closet.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setSavedItemName(null);
+                setSelectedItem(null);
+              }}
+              className="mt-7 rounded-full border border-[var(--espresso)] bg-[var(--espresso)] px-6 py-3 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+</section>
   );
 }

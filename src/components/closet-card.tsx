@@ -1,19 +1,19 @@
-import type { WardrobeItem } from "@/types/wardrobe";
+import Link from "next/link";
 import { AtelierPlaceholder } from "@/components/atelier-placeholder";
+import type { WardrobeItem } from "@/types/wardrobe";
 
 type ClosetCardProps = {
   item: WardrobeItem;
+  onSelect?: (item: WardrobeItem) => void;
 };
-
 
 function formatCategory(category: string) {
   return category.replace("-", " ");
 }
 
-export function ClosetCard({ item }: ClosetCardProps) {
-
+function ClosetCardContent({ item }: { item: WardrobeItem }) {
   return (
-    <article className="group overflow-hidden rounded-[4px] border border-[var(--line)] bg-[var(--paper)] shadow-[0_18px_60px_rgba(74,47,34,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(74,47,34,0.1)]">
+    <>
       <div className="bg-[var(--paper-2)] p-4">
         {item.imageUrl ? (
           <div
@@ -32,7 +32,7 @@ export function ClosetCard({ item }: ClosetCardProps) {
         )}
       </div>
 
-      <div className="px-6 pb-6 pt-5">
+      <div className="px-6 pb-6 pt-5 text-left">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
@@ -61,6 +61,29 @@ export function ClosetCard({ item }: ClosetCardProps) {
           </p>
         </div>
       </div>
-    </article>
+    </>
+  );
+}
+
+const cardClassName =
+  "group block w-full overflow-hidden rounded-[4px] border border-[var(--line)] bg-[var(--paper)] shadow-[0_18px_60px_rgba(74,47,34,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(74,47,34,0.1)]";
+
+export function ClosetCard({ item, onSelect }: ClosetCardProps) {
+  if (onSelect) {
+    return (
+      <button
+        type="button"
+        onClick={() => onSelect(item)}
+        className={cardClassName}
+      >
+        <ClosetCardContent item={item} />
+      </button>
+    );
+  }
+
+  return (
+    <Link href={`/closet/${item.id}`} className={cardClassName}>
+      <ClosetCardContent item={item} />
+    </Link>
   );
 }
