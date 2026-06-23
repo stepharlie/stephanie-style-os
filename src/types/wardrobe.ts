@@ -44,6 +44,7 @@ export type WardrobeItem = {
   name: string;
   status: "owned";
   category: WardrobeCategory;
+  subcategory?: string;
   colorFamily: ColorFamily;
   colorName: string;
   size?: string;
@@ -80,6 +81,7 @@ export type WishlistItem = {
   name: string;
   status: "wishlist";
   category: WardrobeCategory;
+  subcategory?: string;
   colorFamily: ColorFamily;
   colorName: string;
   size?: string;

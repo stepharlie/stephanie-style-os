@@ -28,6 +28,43 @@ const categoryOptions: WardrobeCategory[] = [
   "jewelry",
 ];
 
+const subcategoryOptionsByCategory: Record<WardrobeCategory, string[]> = {
+  top: [
+    "Sleeveless Top",
+    "Tank",
+    "Camisole",
+    "Crop Top",
+    "Bodysuit",
+    "T-Shirt",
+    "Blouse",
+    "Button Down",
+    "Long Sleeve Top",
+    "Cardigan",
+  ],
+  bottom: [
+    "Straight Leg Pants",
+    "Wide Leg Pants",
+    "Jeans",
+    "Shorts",
+    "Skirt",
+    "Trouser",
+  ],
+  dress: ["Dress", "Jumpsuit", "Romper"],
+  outerwear: ["Blazer", "Jacket", "Vest"],
+  shoes: [
+    "Loafer",
+    "Mule",
+    "Flat",
+    "Sandal",
+    "Heel",
+    "Sneaker",
+    "Boot",
+  ],
+  bag: ["Shoulder Bag", "Crossbody", "Tote", "Clutch"],
+  accessory: ["Belt", "Scarf", "Sunglasses", "Hat"],
+  jewelry: ["Earrings", "Necklace", "Bracelet", "Ring", "Watch"],
+};
+
 const colorFamilyOptions: ColorFamily[] = [
   "black",
   "brown",
@@ -146,6 +183,10 @@ function formatLabel(value: string) {
   return value.replaceAll("-", " ");
 }
 
+function getSubcategoryOptions(category: WardrobeCategory) {
+  return subcategoryOptionsByCategory[category] ?? [];
+}
+
 function getSizeOptions(category: WardrobeCategory) {
   if (category === "shoes") return shoeSizeOptions;
 
@@ -167,12 +208,18 @@ function withCurrentValue(options: string[], currentValue?: string) {
 export function ClosetItemEditForm({ item, onSaved, onSavedConfirmation }: ClosetItemEditFormProps) {
   const router = useRouter();
   const [category, setCategory] = useState<WardrobeCategory>(item.category);
+  const [subcategory, setSubcategory] = useState(item.subcategory ?? "");
   const [colorFamily, setColorFamily] = useState<ColorFamily>(item.colorFamily);
   const [colorName, setColorName] = useState(item.colorName);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">(
     "idle",
   );
   const [errorMessage, setErrorMessage] = useState("");
+
+  const subcategoryOptions = useMemo(
+    () => withCurrentValue(getSubcategoryOptions(category), subcategory),
+    [category, subcategory],
+  );
 
   const sizeOptions = useMemo(
     () => withCurrentValue(getSizeOptions(category), item.size),
@@ -183,6 +230,15 @@ export function ClosetItemEditForm({ item, onSaved, onSavedConfirmation }: Close
     () => withCurrentValue(colorNameByFamily[colorFamily], colorName),
     [colorFamily, colorName],
   );
+
+  function handleCategoryChange(nextCategory: WardrobeCategory) {
+    setCategory(nextCategory);
+    const nextOptions = getSubcategoryOptions(nextCategory);
+
+    if (!nextOptions.includes(subcategory)) {
+      setSubcategory(nextOptions[0] ?? "");
+    }
+  }
 
   function handleColorFamilyChange(nextColorFamily: ColorFamily) {
     setColorFamily(nextColorFamily);
@@ -200,6 +256,7 @@ export function ClosetItemEditForm({ item, onSaved, onSavedConfirmation }: Close
     const payload = {
       name: String(formData.get("name") ?? ""),
       category: String(formData.get("category") ?? "") as WardrobeCategory,
+      subcategory: String(formData.get("subcategory") ?? ""),
       colorFamily: String(formData.get("colorFamily") ?? "") as ColorFamily,
       colorName: String(formData.get("colorName") ?? ""),
       size: String(formData.get("size") ?? ""),
@@ -311,13 +368,32 @@ export function ClosetItemEditForm({ item, onSaved, onSavedConfirmation }: Close
               name="category"
               value={category}
               onChange={(event) =>
-                setCategory(event.target.value as WardrobeCategory)
+                handleCategoryChange(event.target.value as WardrobeCategory)
               }
               className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm capitalize text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
             >
               {categoryOptions.map((option) => (
                 <option key={option} value={option}>
                   {formatLabel(option)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Type
+            </span>
+            <select
+              name="subcategory"
+              value={subcategory}
+              onChange={(event) => setSubcategory(event.target.value)}
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+            >
+              <option value="">Not set</option>
+              {subcategoryOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
                 </option>
               ))}
             </select>
