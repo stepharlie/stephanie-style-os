@@ -20,6 +20,7 @@ import {
 
 type CategoryFilter = WardrobeCategory | "all";
 type ColorFamilyFilter = ColorFamily | "all";
+type ClosetSort = "default" | "score-high" | "score-low" | "missing-scores";
 
 const categoryFilters: {
   value: CategoryFilter;
@@ -140,6 +141,34 @@ function selectedCategoryDescription(category: CategoryFilter) {
   return "Pieces in this category, separated from wishlist and ready to wear.";
 }
 
+
+function getClosetScore(item: WardrobeItem) {
+  const scores = [
+    item.loveScore,
+    item.versatilityScore,
+    item.fitConfidenceScore,
+    item.capsuleValueScore,
+  ].filter((score): score is number => typeof score === "number");
+
+  if (!scores.length) {
+    return null;
+  }
+
+  const average =
+    scores.reduce((total, score) => total + score, 0) / scores.length;
+
+  return Number(average.toFixed(1));
+}
+
+function hasAnyClosetScore(item: WardrobeItem) {
+  return [
+    item.loveScore,
+    item.versatilityScore,
+    item.fitConfidenceScore,
+    item.capsuleValueScore,
+  ].some((score) => typeof score === "number");
+}
+
 type ClosetCategoryBoardProps = {
   items: WardrobeItem[];
 };
@@ -156,6 +185,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     useState<PatternTypeFilter>("all");
   const [selectedPatternSubtype, setSelectedPatternSubtype] =
     useState<PatternSubtypeFilter>("all");
+  const [selectedSort, setSelectedSort] = useState<ClosetSort>("default");
   const [selectedItem, setSelectedItem] = useState<WardrobeItem | null>(null);
   const [savedItemName, setSavedItemName] = useState<string | null>(null);
 
@@ -243,7 +273,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     selectedPatternSubtype,
   ]);
 
-  const visibleItems = items.filter((item) => {
+  const filteredItems = items.filter((item) => {
     if (selectedCategory !== "all" && item.category !== selectedCategory) {
       return false;
     }
@@ -283,6 +313,22 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     return true;
   });
 
+  const visibleItems = [...filteredItems].sort((a, b) => {
+    if (selectedSort === "missing-scores") {
+      return Number(hasAnyClosetScore(a)) - Number(hasAnyClosetScore(b));
+    }
+
+    if (selectedSort === "score-high") {
+      return (getClosetScore(b) ?? -1) - (getClosetScore(a) ?? -1);
+    }
+
+    if (selectedSort === "score-low") {
+      return (getClosetScore(a) ?? 999) - (getClosetScore(b) ?? 999);
+    }
+
+    return 0;
+  });
+
   const getCategoryCount = (category: CategoryFilter) => {
     if (category === "all") return items.length;
 
@@ -299,7 +345,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     selectedColorFamily !== "all" ||
     selectedColorName !== "all" ||
     selectedPatternType !== "all" ||
-    selectedPatternSubtype !== "all";
+    selectedPatternSubtype !== "all" ||
+    selectedSort !== "default";
 
   function handleCategoryChange(category: CategoryFilter) {
     setSelectedCategory(category);
@@ -323,6 +370,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     setSelectedColorName("all");
     setSelectedPatternType("all");
     setSelectedPatternSubtype("all");
+    setSelectedSort("default");
   }
 
   function handleItemSaved(updatedItem: WardrobeItem) {
@@ -407,7 +455,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       </div>
 
       <div className="mb-8 rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-5">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <label className="grid gap-2">
             <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
               Category
@@ -527,6 +575,23 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
               ))}
             </select>
           </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Sort
+            </span>
+            <select
+              value={selectedSort}
+              onChange={(event) => setSelectedSort(event.target.value as ClosetSort)}
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+            >
+              <option value="default">Default</option>
+              <option value="score-high">Highest score</option>
+              <option value="score-low">Lowest score</option>
+              <option value="missing-scores">Missing scores</option>
+            </select>
+          </label>
+
         </div>
 
         {hasActiveFilters ? (
