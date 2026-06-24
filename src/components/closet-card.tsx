@@ -32,7 +32,7 @@ function formatCategory(category: string) {
 function ClosetCardContent({ item }: { item: WardrobeItem }) {
   const closetScore = getClosetScore(item);
   return (
-    <>
+    <div className="flex h-full flex-col">
       <div className="bg-[var(--paper-2)] p-4">
         {item.imageUrl ? (
           <div
@@ -51,13 +51,13 @@ function ClosetCardContent({ item }: { item: WardrobeItem }) {
         )}
       </div>
 
-      <div className="px-6 pb-6 pt-5 text-left">
+      <div className="flex flex-1 flex-col px-6 pb-6 pt-5 text-left">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
               {item.colorName} · {item.size ?? "One size"}
             </p>
-            <h3 className="font-display mt-2 text-[2rem] leading-none text-[var(--espresso)]">
+            <h3 className="font-display mt-2 min-h-[6rem] text-[2rem] leading-none text-[var(--espresso)]">
               {item.name}
             </h3>
           </div>
@@ -107,6 +107,18 @@ function ClosetCardContent({ item }: { item: WardrobeItem }) {
           </div>
         ) : null}
 
+        {item.paidPrice || item.purchaseSource || item.purchaseDate ? (
+          <div className="mt-4 rounded-[3px] border border-[var(--line)] bg-[var(--paper-2)] px-3 py-2 text-[0.62rem] uppercase tracking-[0.16em] text-[var(--ink-soft)]">
+            {item.paidPrice ? (
+              <span className="mr-3">Paid ${item.paidPrice}</span>
+            ) : null}
+            {item.purchaseSource ? (
+              <span className="mr-3">{item.purchaseSource}</span>
+            ) : null}
+            {item.purchaseDate ? <span>{item.purchaseDate}</span> : null}
+          </div>
+        ) : null}
+
         {item.productUrl ? (
           <a
             href={item.productUrl}
@@ -119,7 +131,7 @@ function ClosetCardContent({ item }: { item: WardrobeItem }) {
           </a>
         ) : null}
 
-        <div className="mt-6 border-t border-[var(--line)] pt-5">
+        <div className="mt-auto border-t border-[var(--line)] pt-5">
           <p className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
             Stylist&apos;s note
           </p>
@@ -128,12 +140,12 @@ function ClosetCardContent({ item }: { item: WardrobeItem }) {
           </p>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
 const cardClassName =
-  "group block w-full overflow-hidden rounded-[4px] border border-[var(--line)] bg-[var(--paper)] shadow-[0_18px_60px_rgba(74,47,34,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(74,47,34,0.1)]";
+  "group block h-full w-full overflow-hidden rounded-[4px] border border-[var(--line)] bg-[var(--paper)] shadow-[0_18px_60px_rgba(74,47,34,0.06)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_70px_rgba(74,47,34,0.1)]";
 
 export function ClosetCard({ item, onSelect }: ClosetCardProps) {
   if (onSelect) {

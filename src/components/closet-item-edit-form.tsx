@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import type {
   ColorFamily,
@@ -24,7 +23,24 @@ import {
 type ClosetItemEditFormProps = {
   item: WardrobeItem;
   onSaved?: (updatedItem: WardrobeItem) => void;
+  onCancel?: () => void;
 };
+
+function parsePaidPrice(value: FormDataEntryValue | null) {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const parsed = Number(trimmed);
+
+  return Number.isNaN(parsed) || parsed < 0 ? null : Number(parsed.toFixed(2));
+}
 
 function parseScore(value: FormDataEntryValue | null) {
   const rawValue = String(value ?? "").trim();
@@ -50,7 +66,7 @@ function withCurrentValue(options: string[], currentValue?: string) {
   return [currentValue, ...options];
 }
 
-export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
+export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFormProps) {
   const [category, setCategory] = useState<WardrobeCategory>(item.category);
   const [subcategory, setSubcategory] = useState(item.subcategory ?? "");
   const [colorFamily, setColorFamily] = useState<ColorFamily>(item.colorFamily);
@@ -124,6 +140,9 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
       size: String(formData.get("size") ?? ""),
       brand: String(formData.get("brand") ?? ""),
       productUrl: String(formData.get("productUrl") ?? ""),
+      paidPrice: parsePaidPrice(formData.get("paidPrice")),
+      purchaseSource: String(formData.get("purchaseSource") ?? ""),
+      purchaseDate: String(formData.get("purchaseDate") ?? ""),
       notes: String(formData.get("notes") ?? ""),
       stylingNotes: String(formData.get("stylingNotes") ?? ""),
       vibes: formData.getAll("vibes").map(String) as StyleVibe[],
@@ -161,6 +180,9 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
       size: payload.size || undefined,
       brand: payload.brand || undefined,
       productUrl: payload.productUrl || undefined,
+      paidPrice: payload.paidPrice ?? undefined,
+      purchaseSource: payload.purchaseSource || undefined,
+      purchaseDate: payload.purchaseDate || undefined,
       notes: payload.notes || undefined,
       stylingNotes: payload.stylingNotes || undefined,
       vibes: payload.vibes,
@@ -403,6 +425,54 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
           />
         </label>
 
+        <fieldset className="rounded-[4px] border border-[var(--line)] p-4">
+          <legend className="px-2 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+            Purchase info
+          </legend>
+
+          <div className="mt-3 grid gap-4 md:grid-cols-3">
+            <label className="grid gap-2">
+              <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+                Paid price
+              </span>
+              <input
+                name="paidPrice"
+                type="number"
+                min="0"
+                step="0.01"
+                defaultValue={item.paidPrice ?? ""}
+                placeholder="24.99"
+                className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+              />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+                Purchase source
+              </span>
+              <input
+                name="purchaseSource"
+                type="text"
+                defaultValue={item.purchaseSource ?? ""}
+                placeholder="SHEIN, Zara, Marshalls..."
+                className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+              />
+            </label>
+
+            <label className="grid gap-2">
+              <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+                Purchase date
+              </span>
+              <input
+                name="purchaseDate"
+                type="date"
+                defaultValue={item.purchaseDate ?? ""}
+                className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+              />
+            </label>
+          </div>
+        </fieldset>
+
         <fieldset className="grid gap-4 rounded-[3px] border border-[var(--line)] bg-[var(--paper)] p-4">
           <legend className="px-2 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
             Closet scores
@@ -503,12 +573,13 @@ export function ClosetItemEditForm({ item, onSaved }: ClosetItemEditFormProps) {
             {saveStatus === "saving" ? "Saving..." : "Save changes"}
           </button>
 
-          <Link
-            href="/closet"
+          <button
+            type="button"
+            onClick={onCancel}
             className="rounded-full border border-[var(--line)] px-5 py-3 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[var(--coffee)]"
           >
             Cancel
-          </Link>
+          </button>
         </div>
       </form>
     </section>

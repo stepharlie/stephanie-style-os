@@ -7,6 +7,28 @@ import type {
   WardrobeCategory,
 } from "@/types/wardrobe";
 
+function normalizePaidPrice(value?: number | null) {
+  if (value === null || value === undefined) {
+    return null;
+  }
+
+  if (typeof value !== "number" || Number.isNaN(value) || value < 0) {
+    return undefined;
+  }
+
+  return Number(value.toFixed(2));
+}
+
+function normalizeOptionalText(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  return trimmed.length ? trimmed : null;
+}
+
 function normalizeProductUrl(value?: string) {
   const trimmed = value?.trim();
 
@@ -60,7 +82,10 @@ export async function PATCH(request: Request, context: RouteContext) {
     patternSubtype?: string;
     size?: string;
     brand?: string;
-  productUrl?: string;
+      productUrl?: string;
+    paidPrice?: number | null;
+    purchaseSource?: string | null;
+    purchaseDate?: string | null;
     notes?: string;
     stylingNotes?: string;
     vibes?: StyleVibe[];
@@ -104,6 +129,9 @@ export async function PATCH(request: Request, context: RouteContext) {
       size: body.size?.trim() || null,
       brand: body.brand?.trim() || null,
       product_url: normalizeProductUrl(body.productUrl),
+      paid_price: normalizePaidPrice(body.paidPrice),
+      purchase_source: normalizeOptionalText(body.purchaseSource),
+      purchase_date: normalizeOptionalText(body.purchaseDate),
       notes: body.notes?.trim() || null,
       styling_notes: body.stylingNotes?.trim() || null,
       vibes: Array.isArray(body.vibes) ? body.vibes : [],

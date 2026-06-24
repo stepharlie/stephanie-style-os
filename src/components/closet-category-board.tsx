@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ClosetCard } from "@/components/closet-card";
 import { ClosetItemEditForm } from "@/components/closet-item-edit-form";
 import type {
@@ -210,6 +210,19 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     useState<StylingFocus>("all");
   const [selectedItem, setSelectedItem] = useState<WardrobeItem | null>(null);
   const [savedItemName, setSavedItemName] = useState<string | null>(null);
+
+  useEffect(() => {
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setSelectedItem(null);
+        setSavedItemName(null);
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, []);
 
   const availableSubcategories = useMemo(() => {
     if (selectedCategory === "all") {
@@ -745,6 +758,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
               <ClosetItemEditForm
                 item={selectedItem}
                 onSaved={handleItemSaved}
+                onCancel={() => setSelectedItem(null)}
               />
             </div>
           </div>

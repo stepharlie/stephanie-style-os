@@ -23,6 +23,9 @@ type WardrobeItemRow = {
   brand?: string | null;
   source?: string | null;
   product_url?: string | null;
+  paid_price?: number | null;
+  purchase_source?: string | null;
+  purchase_date?: string | null;
   notes?: string | null;
   styling_notes?: string | null;
   vibes?: WardrobeItem["vibes"] | null;
@@ -106,6 +109,9 @@ export function mapWardrobeItem(row: WardrobeItemRow): WardrobeItem {
     brand: row.brand ?? undefined,
     source: row.source ?? undefined,
     productUrl: row.product_url ?? undefined,
+    paidPrice: row.paid_price ?? undefined,
+    purchaseSource: row.purchase_source ?? undefined,
+    purchaseDate: row.purchase_date ?? undefined,
     imageUrl: primaryImageUrl(row.wardrobe_item_images),
     vibes: row.vibes ?? [],
     loveScore: row.love_score ?? undefined,

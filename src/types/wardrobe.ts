@@ -68,6 +68,9 @@ export type WardrobeItem = {
   brand?: string;
   source?: string;
   productUrl?: string;
+  paidPrice?: number;
+  purchaseSource?: string;
+  purchaseDate?: string;
   imageUrl?: string;
   vibes: StyleVibe[];
   loveScore?: number;
