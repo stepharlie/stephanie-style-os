@@ -217,6 +217,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
   const [imageUploadError, setImageUploadError] = useState("");
   const [pendingCreatePhoto, setPendingCreatePhoto] = useState<File | null>(null);
   const [savedItemName, setSavedItemName] = useState<string | null>(null);
+  const [savedItemVerb, setSavedItemVerb] = useState<"added" | "updated" | "archived">("updated");
+  const [actionErrorMessage, setActionErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
@@ -225,6 +227,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
         setIsAddingItem(false);
         setPendingCreatePhoto(null);
         setSavedItemName(null);
+        setActionErrorMessage(null);
       }
     }
 
@@ -478,7 +481,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     const result = (await response.json()) as { ok?: boolean; error?: string };
 
     if (!response.ok || !result.ok) {
-      setSavedItemName(result.error ?? "Could not archive item");
+      setActionErrorMessage(result.error ?? "Could not archive item.");
       return;
     }
 
@@ -491,7 +494,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       currentItems.map((item) => (item.id === selectedItem.id ? archivedItem : item)),
     );
     setSelectedItem(null);
-    setSavedItemName(`${selectedItem.name} archived`);
+    setSavedItemVerb("archived");
+    setSavedItemName(selectedItem.name);
   }
 
   async function uploadImageForItem(item: WardrobeItem, file: File) {
@@ -574,6 +578,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     }
 
     setItems((currentItems) => [finalItem, ...currentItems]);
+    setSavedItemVerb("added");
     setSavedItemName(finalItem.name);
     setPendingCreatePhoto(null);
     setIsAddingItem(false);
@@ -586,6 +591,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
         item.id === updatedItem.id ? updatedItem : item,
       ),
     );
+    setSelectedItem(updatedItem);
+    setSavedItemVerb("updated");
     setSavedItemName(updatedItem.name);
   }
 
@@ -1102,15 +1109,44 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       ) : null}
 
 
+      {actionErrorMessage ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(46,31,24,0.34)] px-4 backdrop-blur-sm">
+          <div className="max-w-md rounded-[6px] border border-[var(--line)] bg-[var(--paper)] p-8 text-center shadow-[0_30px_100px_rgba(46,31,24,0.22)]">
+            <p className="eyebrow mb-3 text-[var(--rust)]">Action needed</p>
+            <h3 className="font-display text-3xl text-[var(--espresso)]">
+              Could not complete action.
+            </h3>
+            <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
+              {actionErrorMessage}
+            </p>
+            <button
+              type="button"
+              onClick={() => setActionErrorMessage(null)}
+              className="mt-6 rounded-full bg-[var(--espresso)] px-6 py-3 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      ) : null}
+
       {savedItemName ? (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[rgba(46,31,24,0.38)] px-6 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-[6px] border border-[var(--line)] bg-[var(--paper)] p-7 text-center shadow-[0_32px_100px_rgba(46,31,24,0.28)]">
             <p className="eyebrow mb-3">Saved</p>
             <h3 className="font-display text-4xl leading-none text-[var(--espresso)]">
-              Changes saved successfully.
+              {savedItemVerb === "added"
+                ? "Piece added successfully."
+                : savedItemVerb === "archived"
+                  ? "Item archived."
+                  : "Changes saved successfully."}
             </h3>
             <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-[var(--ink-soft)]">
-              {savedItemName} was updated in your closet.
+              {savedItemName} was {savedItemVerb === "added"
+                ? "added to"
+                : savedItemVerb === "archived"
+                  ? "archived from"
+                  : "updated in"} your closet.
             </p>
             <button
               type="button"

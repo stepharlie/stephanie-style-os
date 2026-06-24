@@ -217,9 +217,9 @@ export function ClosetItemEditForm({ item, onSaved, onCancel, mode = "edit" }: C
         {isCreateMode ? "New closet piece" : item.name}
       </h2>
       <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
-        {isCreateMode ? "Create a new owned closet item." : "Use this form to correct color, category, size, brand, and stylist notes."}
-        Later this same screen will include photo replacement and AI-assisted
-        descriptions.
+        {isCreateMode
+          ? "Create a new owned closet item. Add details and attach a photo in the same flow."
+          : "Use this form to correct color, category, size, brand, purchase info, scores, and styling notes."}
       </p>
 
       {saveStatus === "error" ? (
