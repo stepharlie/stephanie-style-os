@@ -1,5 +1,12 @@
 export type WardrobeStatus = "owned" | "wishlist";
 
+export type WardrobeItemStatus =
+  | "active"
+  | "archived"
+  | "donated"
+  | "sold"
+  | "damaged";
+
 export type WardrobeCategory =
   | "top"
   | "bottom"
@@ -59,6 +66,7 @@ export type WardrobeItem = {
   name: string;
   status: "owned";
   category: WardrobeCategory;
+  itemStatus?: WardrobeItemStatus;
   subcategory?: string;
   colorFamily: ColorFamily;
   colorName: string;

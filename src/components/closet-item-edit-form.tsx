@@ -132,6 +132,7 @@ export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFo
     const payload = {
       name: String(formData.get("name") ?? ""),
       category: String(formData.get("category") ?? "") as WardrobeCategory,
+      itemStatus: String(formData.get("itemStatus") ?? "active") as WardrobeItem["itemStatus"],
       subcategory: String(formData.get("subcategory") ?? ""),
       colorFamily: String(formData.get("colorFamily") ?? "") as ColorFamily,
       colorName: String(formData.get("colorName") ?? ""),
@@ -172,6 +173,7 @@ export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFo
       ...item,
       name: payload.name,
       category: payload.category,
+      itemStatus: payload.itemStatus || "active",
       subcategory: payload.subcategory || undefined,
       colorFamily: payload.colorFamily,
       colorName: payload.colorName,
@@ -424,6 +426,29 @@ export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFo
             className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-4 py-3 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
           />
         </label>
+
+        <fieldset className="rounded-[4px] border border-[var(--line)] p-4">
+          <legend className="px-2 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+            Item status
+          </legend>
+
+          <label className="mt-3 grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Status
+            </span>
+            <select
+              name="itemStatus"
+              defaultValue={item.itemStatus ?? "active"}
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+            >
+              <option value="active">Active</option>
+              <option value="archived">Archived</option>
+              <option value="donated">Donated</option>
+              <option value="sold">Sold</option>
+              <option value="damaged">Damaged</option>
+            </select>
+          </label>
+        </fieldset>
 
         <fieldset className="rounded-[4px] border border-[var(--line)] p-4">
           <legend className="px-2 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">

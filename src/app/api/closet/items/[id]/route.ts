@@ -7,6 +7,24 @@ import type {
   WardrobeCategory,
 } from "@/types/wardrobe";
 
+const allowedItemStatuses = [
+  "active",
+  "archived",
+  "donated",
+  "sold",
+  "damaged",
+] as const;
+
+function normalizeItemStatus(value?: string | null) {
+  if (!value) {
+    return "active";
+  }
+
+  return allowedItemStatuses.includes(value as (typeof allowedItemStatuses)[number])
+    ? value
+    : "active";
+}
+
 function normalizePaidPrice(value?: number | null) {
   if (value === null || value === undefined) {
     return null;
@@ -75,6 +93,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   let body: {
     name?: string;
     category?: WardrobeCategory;
+    itemStatus?: string | null;
     subcategory?: string;
     colorFamily?: ColorFamily;
     colorName?: string;
@@ -121,6 +140,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     .update({
       name,
       category,
+      item_status: normalizeItemStatus(body.itemStatus),
       subcategory: body.subcategory?.trim() || null,
       color_family: colorFamily,
       color_name: colorName,

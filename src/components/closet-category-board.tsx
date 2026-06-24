@@ -22,6 +22,7 @@ type CategoryFilter = WardrobeCategory | "all";
 type ColorFamilyFilter = ColorFamily | "all";
 type ClosetSort = "default" | "score-high" | "score-low" | "missing-scores";
 type StylingFocus = "all" | "needs-styling" | "complete-scores";
+type ItemStatusFilter = "all" | "active" | "archived" | "donated" | "sold" | "damaged";
 
 const categoryFilters: {
   value: CategoryFilter;
@@ -208,6 +209,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
   const [selectedSort, setSelectedSort] = useState<ClosetSort>("default");
   const [selectedStylingFocus, setSelectedStylingFocus] =
     useState<StylingFocus>("all");
+  const [selectedItemStatus, setSelectedItemStatus] =
+    useState<ItemStatusFilter>("active");
   const [selectedItem, setSelectedItem] = useState<WardrobeItem | null>(null);
   const [savedItemName, setSavedItemName] = useState<string | null>(null);
 
@@ -332,6 +335,13 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     }
 
     if (
+      selectedItemStatus !== "all" &&
+      (item.itemStatus ?? "active") !== selectedItemStatus
+    ) {
+      return false;
+    }
+
+    if (
       selectedPatternType !== "all" &&
       item.patternType !== selectedPatternType
     ) {
@@ -393,7 +403,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     selectedPatternType !== "all" ||
     selectedPatternSubtype !== "all" ||
     selectedSort !== "default" ||
-    selectedStylingFocus !== "all";
+    selectedStylingFocus !== "all" ||
+    selectedItemStatus !== "active";
 
   function handleCategoryChange(category: CategoryFilter) {
     setSelectedCategory(category);
@@ -419,6 +430,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     setSelectedPatternSubtype("all");
     setSelectedSort("default");
     setSelectedStylingFocus("all");
+    setSelectedItemStatus("active");
   }
 
   function handleItemSaved(updatedItem: WardrobeItem) {
@@ -503,7 +515,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       </div>
 
       <div className="mb-8 rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-5">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-9">
           <label className="grid gap-2">
             <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
               Category
@@ -621,6 +633,26 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
                   {subtype}
                 </option>
               ))}
+            </select>
+          </label>
+
+          <label className="grid gap-2">
+            <span className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+              Status
+            </span>
+            <select
+              value={selectedItemStatus}
+              onChange={(event) =>
+                setSelectedItemStatus(event.target.value as ItemStatusFilter)
+              }
+              className="rounded-[3px] border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--espresso)] outline-none focus:border-[var(--coffee)]"
+            >
+              <option value="active">Active</option>
+              <option value="all">All statuses</option>
+              <option value="archived">Archived</option>
+              <option value="donated">Donated</option>
+              <option value="sold">Sold</option>
+              <option value="damaged">Damaged</option>
             </select>
           </label>
 

@@ -14,6 +14,7 @@ type WardrobeItemRow = {
   name: string;
   status: "owned";
   category: WardrobeItem["category"];
+  item_status?: WardrobeItem["itemStatus"] | null;
   subcategory?: string | null;
   color_family: WardrobeItem["colorFamily"];
   color_name: string;
@@ -100,6 +101,7 @@ export function mapWardrobeItem(row: WardrobeItemRow): WardrobeItem {
     name: row.name,
     status: "owned",
     category: row.category,
+    itemStatus: row.item_status ?? "active",
     subcategory: row.subcategory ?? undefined,
     colorFamily: row.color_family,
     colorName: row.color_name,

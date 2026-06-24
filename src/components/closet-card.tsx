@@ -71,6 +71,12 @@ function ClosetCardContent({ item }: { item: WardrobeItem }) {
           {item.vibes.join(" / ")}
         </p>
 
+        {item.itemStatus && item.itemStatus !== "active" ? (
+          <div className="mt-4 rounded-[3px] border border-[var(--line)] bg-[var(--paper-2)] px-3 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-[var(--coffee)]">
+            Status: {item.itemStatus}
+          </div>
+        ) : null}
+
         {closetScore !== null ? (
           <div className="mt-4 rounded-[3px] border border-[var(--coffee)] bg-[var(--paper)] px-3 py-2 text-center">
             <p className="text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
