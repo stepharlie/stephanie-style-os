@@ -212,12 +212,14 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
   const [selectedItemStatus, setSelectedItemStatus] =
     useState<ItemStatusFilter>("active");
   const [selectedItem, setSelectedItem] = useState<WardrobeItem | null>(null);
+  const [isAddingItem, setIsAddingItem] = useState(false);
   const [savedItemName, setSavedItemName] = useState<string | null>(null);
 
   useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setSelectedItem(null);
+        setIsAddingItem(false);
         setSavedItemName(null);
       }
     }
@@ -433,6 +435,26 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     setSelectedItemStatus("active");
   }
 
+
+  const newItemDraft: WardrobeItem = {
+    id: "__new__",
+    name: "New closet piece",
+    status: "owned",
+    category: "top",
+    itemStatus: "active",
+    colorFamily: "black",
+    colorName: "Black",
+    vibes: [],
+    notes: "",
+    stylingNotes: "",
+  };
+
+
+  function handleItemCreated(createdItem: WardrobeItem) {
+    setItems((currentItems) => [createdItem, ...currentItems]);
+    setSavedItemName(createdItem.name);
+  }
+
   function handleItemSaved(updatedItem: WardrobeItem) {
     setItems((currentItems) =>
       currentItems.map((item) =>
@@ -456,7 +478,11 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
           </p>
         </div>
 
-        <button className="w-fit text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[var(--coffee)]">
+        <button
+          type="button"
+          onClick={() => setIsAddingItem(true)}
+          className="w-fit text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[var(--coffee)]"
+        >
           + Add Piece
         </button>
       </div>
@@ -738,6 +764,46 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
         </div>
       )}
     
+      {isAddingItem ? (
+        <div
+          className="fixed inset-0 z-40 overflow-y-auto bg-[rgba(46,31,24,0.34)] px-4 py-8 backdrop-blur-sm md:px-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Add closet item"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsAddingItem(false);
+            }
+          }}
+        >
+          <div className="mx-auto max-w-6xl rounded-[6px] border border-[var(--line)] bg-[var(--paper)] p-4 shadow-[0_30px_100px_rgba(46,31,24,0.22)] md:p-6">
+            <div className="mb-5 flex items-center justify-between gap-4 border-b border-[var(--line)] pb-4">
+              <div>
+                <p className="eyebrow mb-2">Add closet item</p>
+                <h3 className="font-display text-3xl leading-none text-[var(--espresso)]">
+                  New closet piece
+                </h3>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsAddingItem(false)}
+                className="rounded-full border border-[var(--line)] px-4 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[var(--coffee)]"
+              >
+                Close
+              </button>
+            </div>
+
+            <ClosetItemEditForm
+              item={newItemDraft}
+              mode="create"
+              onSaved={handleItemCreated}
+              onCancel={() => setIsAddingItem(false)}
+            />
+          </div>
+        </div>
+      ) : null}
+
       {selectedItem ? (
         <div
           className="fixed inset-0 z-40 overflow-y-auto bg-[rgba(46,31,24,0.34)] px-4 py-8 backdrop-blur-sm md:px-8"

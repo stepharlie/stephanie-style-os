@@ -24,6 +24,7 @@ type ClosetItemEditFormProps = {
   item: WardrobeItem;
   onSaved?: (updatedItem: WardrobeItem) => void;
   onCancel?: () => void;
+  mode?: "edit" | "create";
 };
 
 function parsePaidPrice(value: FormDataEntryValue | null) {
@@ -66,7 +67,7 @@ function withCurrentValue(options: string[], currentValue?: string) {
   return [currentValue, ...options];
 }
 
-export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFormProps) {
+export function ClosetItemEditForm({ item, onSaved, onCancel, mode = "edit" }: ClosetItemEditFormProps) {
   const [category, setCategory] = useState<WardrobeCategory>(item.category);
   const [subcategory, setSubcategory] = useState(item.subcategory ?? "");
   const [colorFamily, setColorFamily] = useState<ColorFamily>(item.colorFamily);
@@ -77,6 +78,7 @@ export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFo
     "idle",
   );
   const [errorMessage, setErrorMessage] = useState("");
+  const isCreateMode = mode === "create";
 
   const subcategoryOptions = useMemo(
     () => withCurrentValue(getSubcategoryOptions(category), subcategory),
@@ -153,15 +155,18 @@ export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFo
       capsuleValueScore: parseScore(formData.get("capsuleValueScore")),
     };
 
-    const response = await fetch(`/api/closet/items/${item.id}`, {
-      method: "PATCH",
+    const response = await fetch(
+      isCreateMode ? "/api/closet/items" : `/api/closet/items/${item.id}`,
+      {
+      method: isCreateMode ? "POST" : "PATCH",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(payload),
-    });
+    },
+    );
 
-    const result = (await response.json()) as { ok?: boolean; error?: string };
+    const result = (await response.json()) as { ok?: boolean; id?: string; error?: string };
 
     if (!response.ok || !result.ok) {
       setSaveStatus("error");
@@ -171,6 +176,7 @@ export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFo
 
     const updatedItem: WardrobeItem = {
       ...item,
+      id: result.id ?? item.id,
       name: payload.name,
       category: payload.category,
       itemStatus: payload.itemStatus || "active",
@@ -206,12 +212,12 @@ export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFo
 
   return (
     <section className="rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-7">
-      <p className="eyebrow mb-3">Edit item</p>
+      <p className="eyebrow mb-3">{isCreateMode ? "Add item" : "Edit item"}</p>
       <h2 className="font-display text-4xl leading-none text-[var(--espresso)]">
-        {item.name}
+        {isCreateMode ? "New closet piece" : item.name}
       </h2>
       <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
-        Use this form to correct color, category, size, brand, and stylist notes.
+        {isCreateMode ? "Create a new owned closet item." : "Use this form to correct color, category, size, brand, and stylist notes."}
         Later this same screen will include photo replacement and AI-assisted
         descriptions.
       </p>
@@ -595,7 +601,7 @@ export function ClosetItemEditForm({ item, onSaved, onCancel }: ClosetItemEditFo
             type="submit"
             className="rounded-full border border-[var(--espresso)] bg-[var(--espresso)] px-5 py-3 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-white"
           >
-            {saveStatus === "saving" ? "Saving..." : "Save changes"}
+            {saveStatus === "saving" ? "Saving..." : isCreateMode ? "Create piece" : "Save changes"}
           </button>
 
           <button
