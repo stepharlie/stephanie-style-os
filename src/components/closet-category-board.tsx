@@ -215,6 +215,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [imageUploadStatus, setImageUploadStatus] = useState<"idle" | "uploading" | "saved" | "error">("idle");
   const [imageUploadError, setImageUploadError] = useState("");
+  const [pendingCreatePhoto, setPendingCreatePhoto] = useState<File | null>(null);
   const [savedItemName, setSavedItemName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -222,6 +223,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       if (event.key === "Escape") {
         setSelectedItem(null);
         setIsAddingItem(false);
+        setPendingCreatePhoto(null);
         setSavedItemName(null);
       }
     }
@@ -230,6 +232,23 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
 
     return () => window.removeEventListener("keydown", handleEscape);
   }, []);
+
+
+  const pendingCreatePhotoPreviewUrl = useMemo(() => {
+    if (!pendingCreatePhoto) {
+      return "";
+    }
+
+    return URL.createObjectURL(pendingCreatePhoto);
+  }, [pendingCreatePhoto]);
+
+  useEffect(() => {
+    return () => {
+      if (pendingCreatePhotoPreviewUrl) {
+        URL.revokeObjectURL(pendingCreatePhotoPreviewUrl);
+      }
+    };
+  }, [pendingCreatePhotoPreviewUrl]);
 
   const availableSubcategories = useMemo(() => {
     if (selectedCategory === "all") {
@@ -439,6 +458,67 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
 
 
 
+
+  async function handleArchiveSelectedItem() {
+    if (!selectedItem) {
+      return;
+    }
+
+    const response = await fetch(`/api/closet/items/${selectedItem.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...selectedItem,
+        itemStatus: "archived",
+      }),
+    });
+
+    const result = (await response.json()) as { ok?: boolean; error?: string };
+
+    if (!response.ok || !result.ok) {
+      setSavedItemName(result.error ?? "Could not archive item");
+      return;
+    }
+
+    const archivedItem = {
+      ...selectedItem,
+      itemStatus: "archived" as const,
+    };
+
+    setItems((currentItems) =>
+      currentItems.map((item) => (item.id === selectedItem.id ? archivedItem : item)),
+    );
+    setSelectedItem(null);
+    setSavedItemName(`${selectedItem.name} archived`);
+  }
+
+  async function uploadImageForItem(item: WardrobeItem, file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`/api/closet/items/${item.id}/image`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = (await response.json()) as {
+      ok?: boolean;
+      imageUrl?: string;
+      error?: string;
+    };
+
+    if (!response.ok || !result.ok || !result.imageUrl) {
+      throw new Error(result.error ?? "Could not upload image.");
+    }
+
+    return {
+      ...item,
+      imageUrl: result.imageUrl,
+    };
+  }
+
   async function handleImageUpload(file: File) {
     if (!selectedItem) {
       return;
@@ -447,29 +527,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     setImageUploadStatus("uploading");
     setImageUploadError("");
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const response = await fetch(`/api/closet/items/${selectedItem.id}/image`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = (await response.json()) as {
-        ok?: boolean;
-        imageUrl?: string;
-        error?: string;
-      };
-
-      if (!response.ok || !result.ok || !result.imageUrl) {
-        throw new Error(result.error ?? "Could not upload image.");
-      }
-
-      const updatedItem = {
-        ...selectedItem,
-        imageUrl: result.imageUrl,
-      };
+      const updatedItem = await uploadImageForItem(selectedItem, file);
 
       setSelectedItem(updatedItem);
       setItems((currentItems) =>
@@ -496,12 +555,32 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
   };
 
 
-  function handleItemCreated(createdItem: WardrobeItem) {
-    setItems((currentItems) => [createdItem, ...currentItems]);
-    setSavedItemName(createdItem.name);
+  async function handleItemCreated(createdItem: WardrobeItem) {
+    setImageUploadStatus("idle");
+    setImageUploadError("");
+
+    let finalItem = createdItem;
+
+    if (pendingCreatePhoto) {
+      setImageUploadStatus("uploading");
+
+      try {
+        finalItem = await uploadImageForItem(createdItem, pendingCreatePhoto);
+        setImageUploadStatus("saved");
+      } catch (error) {
+        setImageUploadStatus("error");
+        setImageUploadError(error instanceof Error ? error.message : "Could not upload image.");
+      }
+    }
+
+    setItems((currentItems) => [finalItem, ...currentItems]);
+    setSavedItemName(finalItem.name);
+    setPendingCreatePhoto(null);
+    setIsAddingItem(false);
+    setSelectedItem(finalItem);
   }
 
-  function handleItemSaved(updatedItem: WardrobeItem) {
+ function handleItemSaved(updatedItem: WardrobeItem) {
     setItems((currentItems) =>
       currentItems.map((item) =>
         item.id === updatedItem.id ? updatedItem : item,
@@ -526,7 +605,12 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
 
         <button
           type="button"
-          onClick={() => setIsAddingItem(true)}
+          onClick={() => {
+            setPendingCreatePhoto(null);
+            setImageUploadStatus("idle");
+            setImageUploadError("");
+            setIsAddingItem(true);
+          }}
           className="w-fit text-[0.68rem] font-medium uppercase tracking-[0.28em] text-[var(--coffee)]"
         >
           + Add Piece
@@ -827,6 +911,7 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) {
               setIsAddingItem(false);
+              setPendingCreatePhoto(null);
             }
           }}
         >
@@ -841,19 +926,70 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
 
               <button
                 type="button"
-                onClick={() => setIsAddingItem(false)}
+                onClick={() => {
+                  setIsAddingItem(false);
+                  setPendingCreatePhoto(null);
+                }}
                 className="rounded-full border border-[var(--line)] px-4 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[var(--coffee)]"
               >
                 Close
               </button>
             </div>
 
-            <ClosetItemEditForm
-              item={newItemDraft}
-              mode="create"
-              onSaved={handleItemCreated}
-              onCancel={() => setIsAddingItem(false)}
-            />
+            <div className="grid gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
+              <aside className="rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-4">
+                {pendingCreatePhotoPreviewUrl ? (
+                  <div
+                    className="min-h-[32rem] rounded-[3px] bg-[var(--paper)] bg-contain bg-center bg-no-repeat"
+                    style={{ backgroundImage: `url(${pendingCreatePhotoPreviewUrl})` }}
+                    aria-label={pendingCreatePhoto?.name ?? "New closet piece preview"}
+                  />
+                ) : (
+                  <div className="flex min-h-[32rem] items-center justify-center rounded-[3px] bg-[var(--paper)] px-6 text-center text-sm text-[var(--ink-soft)]">
+                    No photo selected yet.
+                  </div>
+                )}
+
+                <div className="mt-4 rounded-[4px] border border-dashed border-[var(--line)] bg-[var(--paper)] p-4">
+                  <label className="block text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+                    Photo for new piece
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="mt-3 block w-full text-xs text-[var(--ink-soft)] file:mr-4 file:rounded-full file:border-0 file:bg-[var(--espresso)] file:px-4 file:py-2 file:text-[0.58rem] file:font-semibold file:uppercase file:tracking-[0.18em] file:text-white"
+                      disabled={imageUploadStatus === "uploading"}
+                      onChange={(event) => {
+                        setPendingCreatePhoto(event.target.files?.[0] ?? null);
+                      }}
+                    />
+                  </label>
+
+                  <p className="mt-3 text-xs leading-6 text-[var(--ink-soft)]">
+                    Choose the photo here. It will upload automatically after the piece is created.
+                  </p>
+
+                  {imageUploadStatus === "uploading" ? (
+                    <p className="mt-3 text-xs text-[var(--ink-soft)]">Uploading photo...</p>
+                  ) : null}
+
+                  {imageUploadStatus === "error" ? (
+                    <p className="mt-3 text-xs font-semibold text-[var(--rust)]">
+                      {imageUploadError}
+                    </p>
+                  ) : null}
+                </div>
+              </aside>
+
+              <ClosetItemEditForm
+                item={newItemDraft}
+                mode="create"
+                onSaved={handleItemCreated}
+                onCancel={() => {
+                  setIsAddingItem(false);
+                  setPendingCreatePhoto(null);
+                }}
+              />
+            </div>
           </div>
         </div>
       ) : null}
@@ -879,13 +1015,23 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
                 </h3>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setSelectedItem(null)}
-                className="rounded-full border border-[var(--line)] px-4 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[var(--coffee)]"
-              >
-                Close
-              </button>
+              <div className="flex flex-wrap justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleArchiveSelectedItem()}
+                  className="rounded-full border border-[var(--line)] px-4 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[var(--rust)]"
+                >
+                  Archive item
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedItem(null)}
+                  className="rounded-full border border-[var(--line)] px-4 py-2 text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-[var(--coffee)]"
+                >
+                  Close
+                </button>
+              </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
