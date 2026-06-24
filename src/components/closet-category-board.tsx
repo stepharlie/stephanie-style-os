@@ -213,6 +213,8 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     useState<ItemStatusFilter>("active");
   const [selectedItem, setSelectedItem] = useState<WardrobeItem | null>(null);
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [imageUploadStatus, setImageUploadStatus] = useState<"idle" | "uploading" | "saved" | "error">("idle");
+  const [imageUploadError, setImageUploadError] = useState("");
   const [savedItemName, setSavedItemName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -435,6 +437,50 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
     setSelectedItemStatus("active");
   }
 
+
+
+  async function handleImageUpload(file: File) {
+    if (!selectedItem) {
+      return;
+    }
+
+    setImageUploadStatus("uploading");
+    setImageUploadError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(`/api/closet/items/${selectedItem.id}/image`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = (await response.json()) as {
+        ok?: boolean;
+        imageUrl?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !result.ok || !result.imageUrl) {
+        throw new Error(result.error ?? "Could not upload image.");
+      }
+
+      const updatedItem = {
+        ...selectedItem,
+        imageUrl: result.imageUrl,
+      };
+
+      setSelectedItem(updatedItem);
+      setItems((currentItems) =>
+        currentItems.map((item) => (item.id === selectedItem.id ? updatedItem : item)),
+      );
+      setImageUploadStatus("saved");
+    } catch (error) {
+      setImageUploadStatus("error");
+      setImageUploadError(error instanceof Error ? error.message : "Could not upload image.");
+    }
+  }
 
   const newItemDraft: WardrobeItem = {
     id: "__new__",
@@ -750,7 +796,15 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
       {visibleItems.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {visibleItems.map((item) => (
-            <ClosetCard key={item.id} item={item} onSelect={setSelectedItem} />
+            <ClosetCard
+              key={item.id}
+              item={item}
+              onSelect={(nextItem) => {
+                setSelectedItem(nextItem);
+                setImageUploadStatus("idle");
+                setImageUploadError("");
+              }}
+            />
           ))}
         </div>
       ) : (
@@ -847,6 +901,44 @@ export function ClosetCategoryBoard({ items: initialItems }: ClosetCategoryBoard
                     No photo yet.
                   </div>
                 )}
+
+
+                <div className="mt-4 rounded-[4px] border border-dashed border-[var(--line)] bg-[var(--paper)] p-4">
+                  <label className="block text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+                    Upload / replace photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="mt-3 block w-full text-xs text-[var(--ink-soft)] file:mr-4 file:rounded-full file:border-0 file:bg-[var(--espresso)] file:px-4 file:py-2 file:text-[0.58rem] file:font-semibold file:uppercase file:tracking-[0.18em] file:text-white"
+                      disabled={imageUploadStatus === "uploading"}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+
+                        if (file) {
+                          void handleImageUpload(file);
+                        }
+
+                        event.target.value = "";
+                      }}
+                    />
+                  </label>
+
+                  {imageUploadStatus === "uploading" ? (
+                    <p className="mt-3 text-xs text-[var(--ink-soft)]">Uploading photo...</p>
+                  ) : null}
+
+                  {imageUploadStatus === "saved" ? (
+                    <p className="mt-3 text-xs font-semibold text-[var(--olive)]">
+                      Photo updated.
+                    </p>
+                  ) : null}
+
+                  {imageUploadStatus === "error" ? (
+                    <p className="mt-3 text-xs font-semibold text-[var(--rust)]">
+                      {imageUploadError}
+                    </p>
+                  ) : null}
+                </div>
 
                 <p className="mt-4 text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
                   {selectedItem.category} · {selectedItem.colorName}
