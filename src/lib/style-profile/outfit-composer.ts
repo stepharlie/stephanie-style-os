@@ -398,7 +398,6 @@ function getDecision(
 
   if (
     colorValidation.status === "needs_review" ||
-    colorValidation.status === "approved_with_note" ||
     stylingValidation.stylingStatus !== "elevated"
   ) {
     return "needs_review"
@@ -412,11 +411,78 @@ function getTotalScore(
   stylingValidation: OutfitStylingResult,
   items: WardrobeItem[]
 ): number {
-  const baseScore = Math.round((colorValidation.harmonyScore * 0.55) + (stylingValidation.elevationScore * 0.45))
-  const closetConfidence = Math.min(10, Math.round(items.reduce((sum, item) => sum + (item.loveScore ?? 0), 0) / 10))
-  const completeLookBonus = items.some(item => item.category === "shoes") ? 3 : 0
+  const baseScore = Math.round((colorValidation.harmonyScore * 0.48) + (stylingValidation.elevationScore * 0.52))
+  const closetConfidence = Math.min(3, Math.round(items.reduce((sum, item) => sum + (item.loveScore ?? 0), 0) / 30))
+  const completeLookBonus = items.some(item => item.category === "shoes") ? 2 : 0
 
-  return Math.max(0, Math.min(100, baseScore + closetConfidence + completeLookBonus))
+  const colorBuilderFamilies: ColorFamily[] = [
+    "burgundy",
+    "olive",
+    "camel",
+    "plum",
+    "mustard",
+    "orange",
+    "blue",
+    "pink",
+    "metallic",
+    "statement",
+  ]
+
+  const safeNeutralFamilies: ColorFamily[] = ["black", "cream", "white", "beige"]
+
+  const dominantCoreItems = items.filter(item =>
+    item.category === "outerwear" ||
+    item.category === "top" ||
+    item.category === "bottom" ||
+    item.category === "dress"
+  )
+
+  const blackDominantCount = dominantCoreItems.filter(item => item.colorFamily === "black").length
+  const hasBlackBottom = items.some(item => item.category === "bottom" && item.colorFamily === "black")
+  const hasNonBlackBottom = items.some(item => item.category === "bottom" && item.colorFamily !== "black")
+  const hasColorBuilderCore = dominantCoreItems.some(item =>
+    colorBuilderFamilies.includes(item.colorFamily) ||
+    item.vibes.includes("tropical") ||
+    item.vibes.includes("statement")
+  )
+  const hasColorBuilderAnywhere = items.some(item =>
+    colorBuilderFamilies.includes(item.colorFamily) ||
+    item.vibes.includes("tropical") ||
+    item.vibes.includes("statement")
+  )
+
+  const allCoreSafeNeutrals =
+    dominantCoreItems.length >= 2 &&
+    dominantCoreItems.every(item => safeNeutralFamilies.includes(item.colorFamily))
+
+  let intentionAdjustment = 0
+
+  if (hasColorBuilderCore) intentionAdjustment += 7
+  else if (hasColorBuilderAnywhere) intentionAdjustment += 3
+
+  if (hasNonBlackBottom) intentionAdjustment += 5
+  if (hasBlackBottom) intentionAdjustment -= 4
+  if (blackDominantCount >= 2) intentionAdjustment -= 12
+  if (blackDominantCount >= 3) intentionAdjustment -= 10
+  if (allCoreSafeNeutrals) intentionAdjustment -= 5
+
+  if (stylingValidation.stylingStatus !== "elevated") intentionAdjustment -= 8
+  if (colorValidation.status === "needs_review") intentionAdjustment -= 5
+  if (colorValidation.status === "approved_with_note") intentionAdjustment -= 2
+
+  const rawScore = baseScore + closetConfidence + completeLookBonus + intentionAdjustment
+
+  let scoreCap = 100
+
+  if (stylingValidation.elevationScore < 90) scoreCap = Math.min(scoreCap, 94)
+  if (stylingValidation.elevationScore < 80) scoreCap = Math.min(scoreCap, 90)
+  if (colorValidation.status === "needs_review") scoreCap = Math.min(scoreCap, 92)
+  if (colorValidation.status === "approved_with_note") scoreCap = Math.min(scoreCap, 95)
+  if (hasBlackBottom) scoreCap = Math.min(scoreCap, 96)
+  if (hasBlackBottom && !hasColorBuilderCore) scoreCap = Math.min(scoreCap, 90)
+  if (allCoreSafeNeutrals && !hasColorBuilderCore) scoreCap = Math.min(scoreCap, 92)
+
+  return Math.max(0, Math.min(scoreCap, rawScore))
 }
 
 function buildTitle(items: WardrobeItem[]): string {
@@ -477,6 +543,22 @@ function composeCandidate(
 
   if (!hasCore) return null
 
+  if (options.occasion === "office") {
+    const hasOuterwear = pieces.some(item => item.category === "outerwear")
+    const hasDress = pieces.some(item => item.category === "dress")
+    const hasExposedCasualTop = pieces.some(item => {
+      const text = textForItem(item)
+      return item.category === "top" && (
+        text.includes("camisole") ||
+        text.includes("tank") ||
+        text.includes("tube") ||
+        text.includes("crop")
+      )
+    })
+
+    if (hasExposedCasualTop && !hasOuterwear && !hasDress) return null
+  }
+
   const stylingItems = pieces.map(wardrobeItemToStylingItem)
 
   const colorValidation = validateOutfitColors(stylingItems, {
@@ -492,7 +574,21 @@ function composeCandidate(
     includeTrendNote: true,
   })
 
-  const decision = getDecision(colorValidation, stylingValidation)
+  let decision = getDecision(colorValidation, stylingValidation)
+
+  if (options.occasion === "office") {
+    const hasOuterwear = pieces.some(item => item.category === "outerwear")
+    const hasCasualOnlyTop = pieces.some(item =>
+      item.category === "top" &&
+      item.vibes.includes("casual") &&
+      !item.vibes.includes("work") &&
+      !item.vibes.includes("elevated")
+    )
+
+    if (hasCasualOnlyTop && !hasOuterwear) {
+      decision = "needs_review"
+    }
+  }
 
   if (options.requireColorApproval && colorValidation.status === "rejected") return null
   if (decision === "rejected") return null
@@ -576,16 +672,66 @@ export function composeOutfits(
     if (look) looks.push(look)
   }
 
-  return looks
-    .sort((a, b) => {
-      if (a.decision !== b.decision) {
-        if (a.decision === "approved") return -1
-        if (b.decision === "approved") return 1
-      }
+  const sortedLooks = looks.sort((a, b) => {
+    if (a.decision !== b.decision) {
+      if (a.decision === "approved") return -1
+      if (b.decision === "approved") return 1
+    }
 
-      return b.totalScore - a.totalScore
-    })
-    .slice(0, resolvedOptions.maxLooks)
+    return b.totalScore - a.totalScore
+  })
+
+  const diverseLooks: ComposedOutfit[] = []
+  const usedCoreKeys = new Set<string>()
+  const usedBottomCounts = new Map<string, number>()
+  const usedOuterwearCounts = new Map<string, number>()
+
+  function addLook(look: ComposedOutfit) {
+    const dress = look.items.find(item => item.category === "dress")?.label
+    const top = look.items.find(item => item.category === "top")?.label
+    const bottom = look.items.find(item => item.category === "bottom")?.label
+    const outerwear = look.items.find(item => item.category === "outerwear")?.label
+
+    const coreKey = dress ? `dress:${dress}` : `top-bottom:${top ?? ""}:${bottom ?? ""}`
+
+    diverseLooks.push(look)
+    usedCoreKeys.add(coreKey)
+
+    if (bottom) usedBottomCounts.set(bottom, (usedBottomCounts.get(bottom) ?? 0) + 1)
+    if (outerwear) usedOuterwearCounts.set(outerwear, (usedOuterwearCounts.get(outerwear) ?? 0) + 1)
+  }
+
+  for (const look of sortedLooks) {
+    if (diverseLooks.length >= resolvedOptions.maxLooks) break
+
+    const dress = look.items.find(item => item.category === "dress")?.label
+    const top = look.items.find(item => item.category === "top")?.label
+    const bottom = look.items.find(item => item.category === "bottom")?.label
+    const outerwear = look.items.find(item => item.category === "outerwear")?.label
+    const coreKey = dress ? `dress:${dress}` : `top-bottom:${top ?? ""}:${bottom ?? ""}`
+
+    if (usedCoreKeys.has(coreKey)) continue
+    if (bottom && (usedBottomCounts.get(bottom) ?? 0) >= 2) continue
+    if (outerwear && (usedOuterwearCounts.get(outerwear) ?? 0) >= 2) continue
+
+    addLook(look)
+  }
+
+  // Relax only if there are not enough looks.
+  for (const look of sortedLooks) {
+    if (diverseLooks.length >= resolvedOptions.maxLooks) break
+    if (diverseLooks.some(existing => existing.id === look.id)) continue
+
+    const bottom = look.items.find(item => item.category === "bottom")?.label
+    const outerwear = look.items.find(item => item.category === "outerwear")?.label
+
+    if (bottom && (usedBottomCounts.get(bottom) ?? 0) >= 3) continue
+    if (outerwear && (usedOuterwearCounts.get(outerwear) ?? 0) >= 3) continue
+
+    addLook(look)
+  }
+
+  return diverseLooks.slice(0, resolvedOptions.maxLooks)
 }
 
 export function buildOutfitComposerContext(): string {

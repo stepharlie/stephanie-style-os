@@ -379,13 +379,28 @@ export function evaluateOutfitStyling(
     })
   }
 
-  const explicitElevation = items.filter(item => item.isElevationPiece)
-  if (explicitElevation.length > 2) {
+  const competingElevation = items.filter(item => {
+    if (!item.isElevationPiece) return false
+
+    // Normal styling supports complete a look, but should not automatically compete.
+    if (item.elevationType === "structured_bag") return false
+    if (item.elevationType === "waist_belt") return false
+    if (item.elevationType === "elevated_shoe") return false
+    if (item.elevationType === "metallic_accent") return false
+    if (item.elevationType === "tuck_or_layer_detail") return false
+
+    // A metallic watch or simple gold jewelry supports the look.
+    if (item.category === "jewelry" && item.dominance === "non_dominant_metallic") return false
+
+    return true
+  })
+
+  if (competingElevation.length > 2) {
     ruleResults.push({
       rule: "ELEVATION-2",
       passed: false,
       severity: "elevation",
-      message: `Too many competing elevation moments (${explicitElevation.length}).`,
+      message: `Too many competing hero moments (${competingElevation.length}).`,
       suggestion: "Pick 1 hero and 1 supporting moment. Let the rest stay quiet.",
     })
   } else {
@@ -444,7 +459,10 @@ export function evaluateOutfitStyling(
     stylingStatus = "proportions_off"
   } else if (failedOccasion.length > 0 && polishRequired >= 4 && elevationScore < 55) {
     stylingStatus = "underdressed"
-  } else if (!hasElevationPiece || failedElevation.some(result => result.rule === "ELEVATION-1")) {
+  } else if (
+    !hasElevationPiece ||
+    failedElevation.some(result => result.rule === "ELEVATION-1" || result.rule === "ELEVATION-2")
+  ) {
     stylingStatus = "needs_elevation"
   } else {
     stylingStatus = "elevated"
