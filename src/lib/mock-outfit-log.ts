@@ -109,7 +109,7 @@ export const outfitLogWeek: OutfitLogDay[] = [
     day: "Sunday",
     date: "Jun 28",
     status: "skipped",
-    title: "Rest / no outfit logged",
+    title: "Rest / no plannerged",
     outfitNeed: "Comfort only.",
     formula: ["Lounge", "Errands", "Low effort"],
     weatherNote: "No styling pressure.",

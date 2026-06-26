@@ -50,16 +50,16 @@ export default function PlannerPage() {
   return (
     <main className="pb-16 md:pb-20">
       <PageHeader
-        eyebrow="Outfit Log"
+        eyebrow="Planner"
         title={
           <>
             Wear it,{" "}
             <em className="text-[var(--coffee)]">then track it.</em>
           </>
         }
-        description="A calendar-based outfit log for planning looks, recording what you wore, and avoiding repeat formulas when you want variety."
+        description="A calendar-based planner for planning looks, recording what you wore, and avoiding repeat formulas when you want variety."
         asideEyebrow="Calendar Mode"
-        asideText="Week view is the default command center for Outfit Log v1."
+        asideText="Week view is the default command center for Planner v1."
       />
 
       <section className="mx-auto max-w-6xl px-6 py-10 md:px-10">

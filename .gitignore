@@ -44,3 +44,5 @@ next-env.d.ts
 closet-photos.zip
 data/closet-photos/
 data/
+public/closet-photos/
+public/data/closet-photos/
