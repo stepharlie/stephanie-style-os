@@ -1,5 +1,9 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
+import {
+  composeOutfits,
+  type ComposedOutfit,
+} from "@/lib/style-profile/outfit-composer";
 import type { WardrobeItem } from "@/types/wardrobe";
 
 type OutfitBuilderProps = {
@@ -23,9 +27,141 @@ function countByCategory(items: WardrobeItem[]) {
   }, {});
 }
 
+function formatMachineLabel(value: string) {
+  return value.replaceAll("_", " ").replaceAll("-", " ");
+}
+
+function decisionLabel(decision: ComposedOutfit["decision"]) {
+  if (decision === "approved") return "Approved";
+  if (decision === "needs_review") return "Needs review";
+  return "Rejected";
+}
+
+function decisionClassName(decision: ComposedOutfit["decision"]) {
+  if (decision === "approved") {
+    return "border-[rgba(88,119,74,0.28)] bg-[rgba(88,119,74,0.10)] text-[var(--espresso)]";
+  }
+
+  if (decision === "needs_review") {
+    return "border-[rgba(194,126,56,0.32)] bg-[rgba(194,126,56,0.10)] text-[var(--coffee)]";
+  }
+
+  return "border-[rgba(128,55,45,0.28)] bg-[rgba(128,55,45,0.10)] text-[var(--espresso)]";
+}
+
+function getPieceText(look: ComposedOutfit) {
+  return look.items.map((item) => item.label).join(" + ");
+}
+
+function GeneratedLookCard({ look, index }: { look: ComposedOutfit; index: number }) {
+  return (
+    <article className="rounded-[8px] border border-[var(--line)] bg-[var(--paper)] p-6 shadow-[0_18px_60px_rgba(74,47,34,0.05)]">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
+            Style Intelligence · Look {String(index + 1).padStart(2, "0")}
+          </p>
+          <h3 className="font-display mt-3 text-[2.35rem] leading-none text-[var(--espresso)]">
+            {look.title}
+          </h3>
+        </div>
+
+        <div
+          className={`rounded-full border px-3 py-1.5 text-[0.55rem] font-semibold uppercase tracking-[0.18em] ${decisionClassName(
+            look.decision,
+          )}`}
+        >
+          {decisionLabel(look.decision)}
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <div className="rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] px-4 py-3">
+          <p className="text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-[var(--caramel)]">
+            Total
+          </p>
+          <p className="mt-1 text-2xl font-semibold text-[var(--espresso)]">
+            {look.totalScore}
+          </p>
+        </div>
+
+        <div className="rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] px-4 py-3">
+          <p className="text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-[var(--caramel)]">
+            Color
+          </p>
+          <p className="mt-1 text-2xl font-semibold text-[var(--espresso)]">
+            {look.colorScore}
+          </p>
+        </div>
+
+        <div className="rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] px-4 py-3">
+          <p className="text-[0.52rem] font-semibold uppercase tracking-[0.18em] text-[var(--caramel)]">
+            Elevation
+          </p>
+          <p className="mt-1 text-2xl font-semibold text-[var(--espresso)]">
+            {look.elevationScore}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-5 rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-4">
+        <p className="text-[0.55rem] font-semibold uppercase tracking-[0.2em] text-[var(--caramel)]">
+          Pieces
+        </p>
+        <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
+          {getPieceText(look)}
+        </p>
+      </div>
+
+      <div className="mt-5 space-y-3 text-sm leading-6 text-[var(--ink-soft)]">
+        <p>
+          <span className="font-semibold text-[var(--espresso)]">Styling: </span>
+          {look.stylingInstruction}
+        </p>
+        <p>
+          <span className="font-semibold text-[var(--espresso)]">Formula: </span>
+          {formatMachineLabel(look.formula)}
+        </p>
+        <p>
+          <span className="font-semibold text-[var(--espresso)]">Color status: </span>
+          {formatMachineLabel(look.colorValidation.status)}
+        </p>
+        <p>
+          <span className="font-semibold text-[var(--espresso)]">Styling status: </span>
+          {formatMachineLabel(look.stylingValidation.stylingStatus)}
+        </p>
+      </div>
+
+      <details className="mt-5 rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-4">
+        <summary className="cursor-pointer text-[0.58rem] font-semibold uppercase tracking-[0.18em] text-[var(--coffee)]">
+          Why it works
+        </summary>
+        <div className="mt-4 space-y-3 text-sm leading-6 text-[var(--ink-soft)]">
+          {look.whyItWorks.map((reason) => (
+            <p key={reason}>{reason}</p>
+          ))}
+        </div>
+      </details>
+    </article>
+  );
+}
+
 export function OutfitBuilder({ items }: OutfitBuilderProps) {
   const activeItems = activeOnly(items);
   const categoryCounts = countByCategory(activeItems);
+
+  const generatedLooks = composeOutfits(activeItems, {
+    occasion: "office",
+    maxLooks: 8,
+    includeOuterwear: true,
+    includeAccessories: true,
+    allowDenim: false,
+    requireColorApproval: false,
+    pushBeyondComfort: true,
+  });
+
+  const approvedLooks = generatedLooks.filter((look) => look.decision === "approved");
+  const reviewLooks = generatedLooks.filter((look) => look.decision === "needs_review");
 
   const slots: OutfitSlot[] = [
     {
@@ -76,9 +212,9 @@ export function OutfitBuilder({ items }: OutfitBuilderProps) {
             <em className="text-[var(--coffee)]">what you own.</em>
           </>
         }
-        description="Foundation mode for outfit building. This page reads your active closet, but it is not making styling recommendations yet."
-        asideEyebrow="Foundation Mode"
-        asideText="No random outfits. Real recommendations need color, silhouette, occasion, weather, and vibe rules."
+        description="Style Intelligence is now reading your active closet and generating office-ready outfit ideas using your color, silhouette, and elevation rules."
+        asideEyebrow="Style Intelligence"
+        asideText="Generated from real closet pieces. Denim is off for this office preview."
       >
         <div className="flex flex-wrap gap-5">
           <Link
@@ -106,7 +242,7 @@ export function OutfitBuilder({ items }: OutfitBuilderProps) {
               {activeItems.length}
             </p>
             <p className="mt-6 max-w-md text-sm leading-7 text-[rgba(255,248,237,0.76)]">
-              These are the pieces eligible for future outfit formulas. Archived,
+              These are the pieces eligible for generated outfit formulas. Archived,
               donated, sold, and damaged pieces are excluded.
             </p>
           </article>
@@ -114,22 +250,40 @@ export function OutfitBuilder({ items }: OutfitBuilderProps) {
           <article className="rounded-[8px] border border-[var(--line)] bg-[var(--paper-2)] p-8">
             <p className="eyebrow mb-3">Recommendation engine</p>
             <h2 className="font-display text-4xl text-[var(--espresso)]">
-              Not active yet
+              Active
             </h2>
             <p className="mt-4 text-sm leading-7 text-[var(--ink-soft)]">
-              The first auto-generated combo was technically correct but stylistically
-              wrong. Before suggesting outfits, the system needs rules for color harmony,
-              occasion, shoe mood, proportions, weather, and your personal taste.
+              The system is now checking color harmony, outfit formula, office polish,
+              silhouette balance, and the elevation rule before showing looks.
             </p>
 
-            <div className="mt-6 rounded-[4px] border border-[var(--line)] bg-[var(--paper)] p-5">
-              <p className="text-[0.58rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
-                Next safe step
-              </p>
-              <p className="mt-3 text-sm leading-7 text-[var(--ink-soft)]">
-                Build a manual slot picker first. Then add smart suggestions only after
-                the rules are good enough to avoid random mismatches.
-              </p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[4px] border border-[var(--line)] bg-[var(--paper)] p-4">
+                <p className="text-3xl font-semibold text-[var(--espresso)]">
+                  {generatedLooks.length}
+                </p>
+                <p className="mt-2 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--caramel)]">
+                  Generated
+                </p>
+              </div>
+
+              <div className="rounded-[4px] border border-[var(--line)] bg-[var(--paper)] p-4">
+                <p className="text-3xl font-semibold text-[var(--espresso)]">
+                  {approvedLooks.length}
+                </p>
+                <p className="mt-2 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--caramel)]">
+                  Approved
+                </p>
+              </div>
+
+              <div className="rounded-[4px] border border-[var(--line)] bg-[var(--paper)] p-4">
+                <p className="text-3xl font-semibold text-[var(--espresso)]">
+                  {reviewLooks.length}
+                </p>
+                <p className="mt-2 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--caramel)]">
+                  Review
+                </p>
+              </div>
             </div>
           </article>
         </div>
@@ -137,13 +291,41 @@ export function OutfitBuilder({ items }: OutfitBuilderProps) {
         <div className="mt-8 rounded-[10px] border border-[var(--line)] bg-[var(--paper-2)] p-5 md:p-7">
           <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="eyebrow mb-2">Outfit formula structure</p>
+              <p className="eyebrow mb-2">Generated by Style Intelligence</p>
               <h2 className="font-display text-4xl text-[var(--espresso)]">
-                Slots we need to fill
+                Office outfit ideas
               </h2>
             </div>
             <p className="max-w-md text-sm leading-6 text-[var(--ink-soft)]">
-              This is the structure only. No fake “recommended outfit” until the picker and rules exist.
+              These are not random combinations. Each look is scored for color,
+              elevation, proportion, and office wearability.
+            </p>
+          </div>
+
+          {generatedLooks.length > 0 ? (
+            <div className="grid gap-6 lg:grid-cols-2">
+              {generatedLooks.map((look, index) => (
+                <GeneratedLookCard key={look.id} look={look} index={index} />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[4px] border border-dashed border-[var(--line)] bg-[var(--paper)] p-8 text-sm leading-7 text-[var(--ink-soft)]">
+              No generated looks yet. Add more active closet items with tops, bottoms,
+              shoes, bags, or accessories.
+            </div>
+          )}
+        </div>
+
+        <div className="mt-8 rounded-[10px] border border-[var(--line)] bg-[var(--paper-2)] p-5 md:p-7">
+          <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="eyebrow mb-2">Outfit formula structure</p>
+              <h2 className="font-display text-4xl text-[var(--espresso)]">
+                Slots the engine fills
+              </h2>
+            </div>
+            <p className="max-w-md text-sm leading-6 text-[var(--ink-soft)]">
+              The composer builds from a core outfit, then adds shoes and styling anchors.
             </p>
           </div>
 
