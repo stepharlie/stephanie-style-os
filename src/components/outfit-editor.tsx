@@ -15,7 +15,7 @@ type LookMetadata = {
   whyItWorks?: string[];
 };
 
-type EditableShoeSwapProps = {
+type OutfitEditorProps = {
   items: WardrobeItem[];
   closetItems: WardrobeItem[];
   lookMetadata?: LookMetadata;
@@ -117,7 +117,7 @@ function sortForDropdown(items: WardrobeItem[]) {
   });
 }
 
-export function EditableShoeSwap({ items, closetItems, lookMetadata }: EditableShoeSwapProps) {
+export function OutfitEditor({ items, closetItems, lookMetadata }: OutfitEditorProps) {
   const storageKey = useMemo(
     () => `the-edit-outfit-edit:${items.map((item) => item.id).sort().join("|")}`,
     [items],
