@@ -25,7 +25,10 @@ function normalizeText(value?: string | null) {
 
 function normalizeArray(value: unknown) {
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+
+  return value.filter(
+    (item): item is string => typeof item === "string" && item.trim().length > 0,
+  );
 }
 
 export async function POST(request: Request) {
@@ -50,6 +53,9 @@ export async function POST(request: Request) {
   }
 
   const title = normalizeText(body.title) ?? "Saved outfit";
+  const status = normalizeText(body.status) ?? "saved";
+  const source = normalizeText(body.source) ?? "generated";
+  const sourceOutfitId = normalizeText(body.sourceOutfitId);
   const editedPieceIds = normalizeArray(body.editedPieceIds);
   const generatedPieceIds = normalizeArray(body.generatedPieceIds);
 
@@ -60,26 +66,57 @@ export async function POST(request: Request) {
     );
   }
 
-  const { data, error } = await supabase
-    .from("saved_outfits")
-    .insert({
-      title,
-      status: normalizeText(body.status) ?? "saved",
-      source: normalizeText(body.source) ?? "generated",
-      source_outfit_id: normalizeText(body.sourceOutfitId),
-      occasion: normalizeText(body.occasion),
-      formula: normalizeText(body.formula),
-      decision: normalizeText(body.decision),
-      generated_piece_ids: generatedPieceIds,
-      edited_piece_ids: editedPieceIds,
-      selected_pieces: Array.isArray(body.selectedPieces) ? body.selectedPieces : [],
-      scores: body.scores ?? {},
-      styling_instruction: normalizeText(body.stylingInstruction),
-      why_it_works: normalizeArray(body.whyItWorks),
-      notes: normalizeText(body.notes),
-    })
-    .select("id")
-    .single();
+  const savedOutfitPayload = {
+    title,
+    status,
+    source,
+    source_outfit_id: sourceOutfitId,
+    occasion: normalizeText(body.occasion),
+    formula: normalizeText(body.formula),
+    decision: normalizeText(body.decision),
+    generated_piece_ids: generatedPieceIds,
+    edited_piece_ids: editedPieceIds,
+    selected_pieces: Array.isArray(body.selectedPieces) ? body.selectedPieces : [],
+    scores: body.scores ?? {},
+    styling_instruction: normalizeText(body.stylingInstruction),
+    why_it_works: normalizeArray(body.whyItWorks),
+    notes: normalizeText(body.notes),
+  };
+
+  let existingId: string | null = null;
+
+  if (sourceOutfitId) {
+    const { data: existing, error: lookupError } = await supabase
+      .from("saved_outfits")
+      .select("id")
+      .eq("source", source)
+      .eq("source_outfit_id", sourceOutfitId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lookupError) {
+      return NextResponse.json(
+        { ok: false, error: lookupError.message },
+        { status: 500 },
+      );
+    }
+
+    existingId = existing?.id ?? null;
+  }
+
+  const { data, error } = existingId
+    ? await supabase
+        .from("saved_outfits")
+        .update(savedOutfitPayload)
+        .eq("id", existingId)
+        .select("id")
+        .single()
+    : await supabase
+        .from("saved_outfits")
+        .insert(savedOutfitPayload)
+        .select("id")
+        .single();
 
   if (error) {
     return NextResponse.json(
@@ -88,7 +125,11 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ ok: true, id: data.id });
+  return NextResponse.json({
+    ok: true,
+    id: data.id,
+    action: existingId ? "updated" : "inserted",
+  });
 }
 
 export async function GET() {

@@ -189,7 +189,7 @@ export function OutfitEditor({ items, closetItems, lookMetadata }: OutfitEditorP
           title: lookMetadata?.title ?? fallbackTitle,
           status: "saved",
           source: "generated",
-          sourceOutfitId: lookMetadata?.sourceOutfitId,
+          sourceOutfitId: lookMetadata?.sourceOutfitId ?? items.map((item) => item.id).sort().join("|"),
           formula: lookMetadata?.formula,
           decision: lookMetadata?.decision,
           generatedPieceIds: lookMetadata?.generatedPieceIds ?? items.map((item) => item.id),
