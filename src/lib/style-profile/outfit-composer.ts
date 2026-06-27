@@ -356,10 +356,20 @@ function getSupportItems(
     return fit === "wide" || fit === "oversized" || fit === "flowy"
   })
 
-  const shoe = getFirstUseful(pools.shoes, options.occasion)
-  const bag = getFirstUseful(pools.bags, options.occasion)
-  const jewelry = getFirstUseful(pools.jewelry, options.occasion)
-  const belt = hasVolume && !hasDress ? getFirstUseful(pools.belts, options.occasion) : undefined
+  const seed = Math.abs(
+    baseItems.map((item) => item.id).join("|").split("").reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  )
+
+  const pickRotated = (items: WardrobeItem[], offset = 0) => {
+    const sorted = sortByUsefulness(items, options.occasion).slice(0, 5)
+    if (sorted.length === 0) return undefined
+    return sorted[(seed + offset) % sorted.length]
+  }
+
+  const shoe = pickRotated(pools.shoes, 0)
+  const bag = pickRotated(pools.bags, 2)
+  const jewelry = pickRotated(pools.jewelry, 4)
+  const belt = hasVolume && !hasDress ? pickRotated(pools.belts, 6) : undefined
 
   return uniqueItems([shoe, bag, jewelry, belt])
 }
@@ -377,7 +387,16 @@ function getPools(items: WardrobeItem[], options: Required<OutfitComposerOptions
     bottoms: sortByUsefulness(active.filter(item => item.category === "bottom"), options.occasion).slice(0, 16),
     dresses: sortByUsefulness(active.filter(item => item.category === "dress"), options.occasion).slice(0, 10),
     outerwear: sortByUsefulness(active.filter(item => item.category === "outerwear"), options.occasion).slice(0, 8),
-    shoes: sortByUsefulness(active.filter(item => item.category === "shoes"), options.occasion).slice(0, 8),
+    shoes: sortByUsefulness(
+      active.filter(item =>
+        item.category === "shoes" &&
+        !(options.occasion === "office" &&
+          textForItem(item).includes("sneaker") &&
+          !item.vibes.includes("work") &&
+          !item.vibes.includes("elevated"))
+      ),
+      options.occasion
+    ).slice(0, 8),
     bags: sortByUsefulness(active.filter(item => item.category === "bag"), options.occasion).slice(0, 8),
     belts: sortByUsefulness(belts, options.occasion).slice(0, 8),
     jewelry: sortByUsefulness(active.filter(item => item.category === "jewelry"), options.occasion).slice(0, 8),
