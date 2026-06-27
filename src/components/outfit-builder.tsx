@@ -69,7 +69,24 @@ function GeneratedLookCard({
 
   return (
     <article className="rounded-[8px] border border-[var(--line)] bg-[var(--paper)] p-6 shadow-[0_18px_60px_rgba(74,47,34,0.05)]">
-      <EditableShoeSwap items={visualItems} closetItems={closetItems} />
+      <EditableShoeSwap
+        items={visualItems}
+        closetItems={closetItems}
+        lookMetadata={{
+          title: look.title,
+          sourceOutfitId: look.id,
+          formula: look.formula,
+          decision: look.decision,
+          generatedPieceIds: look.pieceIds,
+          scores: {
+            total: look.totalScore,
+            color: look.colorScore,
+            elevation: look.elevationScore,
+          },
+          stylingInstruction: look.stylingInstruction,
+          whyItWorks: look.whyItWorks,
+        }}
+      />
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>

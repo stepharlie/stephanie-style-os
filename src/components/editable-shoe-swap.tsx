@@ -4,9 +4,21 @@ import { useEffect, useMemo, useState } from "react";
 import { GeneratedOutfitVisual } from "@/components/generated-outfit-visual";
 import type { WardrobeItem } from "@/types/wardrobe";
 
+type LookMetadata = {
+  title?: string;
+  sourceOutfitId?: string;
+  formula?: string;
+  decision?: string;
+  generatedPieceIds?: string[];
+  scores?: Record<string, unknown>;
+  stylingInstruction?: string;
+  whyItWorks?: string[];
+};
+
 type EditableShoeSwapProps = {
   items: WardrobeItem[];
   closetItems: WardrobeItem[];
+  lookMetadata?: LookMetadata;
 };
 
 type SlotId =
@@ -105,7 +117,7 @@ function sortForDropdown(items: WardrobeItem[]) {
   });
 }
 
-export function EditableShoeSwap({ items, closetItems }: EditableShoeSwapProps) {
+export function EditableShoeSwap({ items, closetItems, lookMetadata }: EditableShoeSwapProps) {
   const storageKey = useMemo(
     () => `the-edit-outfit-edit:${items.map((item) => item.id).sort().join("|")}`,
     [items],
@@ -116,7 +128,8 @@ export function EditableShoeSwap({ items, closetItems }: EditableShoeSwapProps) 
   const [selection, setSelection] =
     useState<Partial<Record<SlotId, string>>>(generatedSelection);
 
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "reset">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "reset" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -144,15 +157,68 @@ export function EditableShoeSwap({ items, closetItems }: EditableShoeSwapProps) 
 
   const editedPieceText = editedItems.map((item) => item.name).join(" + ");
 
-  function saveChanges() {
-    localStorage.setItem(storageKey, JSON.stringify(selection));
-    setSaveStatus("saved");
+  async function saveChanges() {
+    const selectedPieces = editedItems.map((item) => ({
+      id: item.id,
+      name: item.name,
+      category: item.category,
+      colorFamily: item.colorFamily,
+      colorName: item.colorName,
+      imageUrl: item.imageUrl ?? null,
+    }));
+
+    const fallbackTitle =
+      editedItems
+        .filter((item) => ["outerwear", "dress", "top", "bottom"].includes(item.category))
+        .map((item) => item.name)
+        .slice(0, 3)
+        .join(" + ") || "Saved outfit";
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(selection));
+      setSaveStatus("saving");
+      setSaveError(null);
+
+      const response = await fetch("/api/outfits/saved", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: lookMetadata?.title ?? fallbackTitle,
+          status: "saved",
+          source: "generated",
+          sourceOutfitId: lookMetadata?.sourceOutfitId,
+          formula: lookMetadata?.formula,
+          decision: lookMetadata?.decision,
+          generatedPieceIds: lookMetadata?.generatedPieceIds ?? items.map((item) => item.id),
+          editedPieceIds: editedItems.map((item) => item.id),
+          selectedPieces,
+          scores: lookMetadata?.scores ?? {},
+          stylingInstruction: lookMetadata?.stylingInstruction,
+          whyItWorks: lookMetadata?.whyItWorks ?? [],
+          notes: "Saved from generated outfit editor.",
+        }),
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.error ?? "Could not save outfit.");
+      }
+
+      setSaveStatus("saved");
+    } catch (error) {
+      setSaveStatus("error");
+      setSaveError(error instanceof Error ? error.message : "Could not save outfit.");
+    }
   }
 
   function resetChanges() {
     localStorage.removeItem(storageKey);
     setSelection(generatedSelection);
     setSaveStatus("reset");
+    setSaveError(null);
   }
 
   return (
@@ -185,6 +251,7 @@ export function EditableShoeSwap({ items, closetItems }: EditableShoeSwapProps) 
                         [slot.id]: value || undefined,
                       }));
                       setSaveStatus("idle");
+                      setSaveError(null);
                     }}
                     className="mt-2 block w-full rounded-[4px] border border-[var(--line)] bg-[var(--paper)] px-3 py-3 text-sm normal-case tracking-normal text-[var(--espresso)]"
                   >
@@ -206,7 +273,7 @@ export function EditableShoeSwap({ items, closetItems }: EditableShoeSwapProps) 
               onClick={saveChanges}
               className="rounded-full border border-[var(--espresso)] px-4 py-2 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--espresso)]"
             >
-              Save changes
+              {saveStatus === "saving" ? "Saving..." : "Save changes"}
             </button>
 
             <button
@@ -219,10 +286,22 @@ export function EditableShoeSwap({ items, closetItems }: EditableShoeSwapProps) 
 
             {saveStatus !== "idle" ? (
               <span className="rounded-full border border-[rgba(88,119,74,0.28)] bg-[rgba(88,119,74,0.10)] px-4 py-2 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--espresso)]">
-                {saveStatus === "saved" ? "Saved" : "Reset"}
+                {saveStatus === "saving"
+                  ? "Saving"
+                  : saveStatus === "saved"
+                    ? "Saved to Supabase"
+                    : saveStatus === "error"
+                      ? "Save failed"
+                      : "Reset"}
               </span>
             ) : null}
           </div>
+
+          {saveError ? (
+            <p className="mt-3 text-xs leading-5 text-[var(--rust)]">
+              {saveError}
+            </p>
+          ) : null}
         </details>
 
         <div className="mt-4 rounded-[4px] border border-[var(--line)] bg-[var(--paper)] p-4">
