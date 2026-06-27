@@ -12,13 +12,15 @@ async function attachSignedWardrobeImageUrls(items: WardrobeItem[]) {
 
   const signedItems = await Promise.all(
     items.map(async (item) => {
-      if (!item.imageUrl) {
+      const imagePath = item.imagePath ?? item.imageUrl;
+
+      if (!imagePath) {
         return item;
       }
 
       const { data, error } = await supabase.storage
         .from("closet-items")
-        .createSignedUrl(item.imageUrl, 60 * 60);
+        .createSignedUrl(imagePath, 60 * 60);
 
       if (error || !data?.signedUrl) {
         return item;

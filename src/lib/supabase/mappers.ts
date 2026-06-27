@@ -85,17 +85,27 @@ type StyleProfileRow = {
   ai_rules?: unknown;
 };
 
-function primaryImageUrl(images?: SupabaseImageRow[] | null) {
-  if (!images?.length) return undefined;
+function primaryImage(images?: SupabaseImageRow[] | null) {
+  if (!images?.length) {
+    return {
+      imageUrl: undefined,
+      imagePath: undefined,
+    };
+  }
 
   const primary =
     images.find((image) => image.is_primary) ??
     [...images].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))[0];
 
-  return primary?.image_url ?? primary?.image_path ?? undefined;
+  return {
+    imageUrl: primary?.image_url ?? primary?.image_path ?? undefined,
+    imagePath: primary?.image_path ?? undefined,
+  };
 }
 
 export function mapWardrobeItem(row: WardrobeItemRow): WardrobeItem {
+  const wardrobeImage = primaryImage(row.wardrobe_item_images);
+
   return {
     id: row.id,
     name: row.name,
@@ -114,7 +124,8 @@ export function mapWardrobeItem(row: WardrobeItemRow): WardrobeItem {
     paidPrice: row.paid_price ?? undefined,
     purchaseSource: row.purchase_source ?? undefined,
     purchaseDate: row.purchase_date ?? undefined,
-    imageUrl: primaryImageUrl(row.wardrobe_item_images),
+    imageUrl: wardrobeImage.imageUrl,
+    imagePath: wardrobeImage.imagePath,
     vibes: row.vibes ?? [],
     loveScore: row.love_score ?? undefined,
     versatilityScore: row.versatility_score ?? undefined,
@@ -126,6 +137,8 @@ export function mapWardrobeItem(row: WardrobeItemRow): WardrobeItem {
 }
 
 export function mapWishlistItem(row: WishlistItemRow): WishlistItem {
+  const wishlistImage = primaryImage(row.wishlist_item_images);
+
   return {
     id: row.id,
     name: row.name,
@@ -138,7 +151,8 @@ export function mapWishlistItem(row: WishlistItemRow): WishlistItem {
     brand: row.brand ?? undefined,
     source: row.source ?? undefined,
     productUrl: row.product_url ?? undefined,
-    imageUrl: primaryImageUrl(row.wishlist_item_images),
+    imageUrl: wishlistImage.imageUrl,
+    imagePath: wishlistImage.imagePath,
     vibes: row.vibes ?? [],
     decision: row.decision,
     priorityTier: row.priority_tier,

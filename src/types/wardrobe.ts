@@ -80,6 +80,7 @@ export type WardrobeItem = {
   purchaseSource?: string;
   purchaseDate?: string;
   imageUrl?: string;
+  imagePath?: string;
   vibes: StyleVibe[];
   loveScore?: number;
   versatilityScore?: number;
@@ -122,6 +123,7 @@ export type WishlistItem = {
   source?: string;
   productUrl?: string;
   imageUrl?: string;
+  imagePath?: string;
   vibes: StyleVibe[];
   decision: WishlistDecision;
   priorityTier: WishlistPriorityTier;

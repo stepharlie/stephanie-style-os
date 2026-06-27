@@ -164,7 +164,8 @@ export function OutfitEditor({ items, closetItems, lookMetadata }: OutfitEditorP
       category: item.category,
       colorFamily: item.colorFamily,
       colorName: item.colorName,
-      imageUrl: item.imageUrl ?? null,
+      imagePath: item.imagePath ?? null,
+      imageUrl: null,
     }));
 
     const fallbackTitle =
