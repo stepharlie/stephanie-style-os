@@ -158,6 +158,7 @@ export async function getSavedOutfits() {
   const { data, error } = await supabase
     .from("saved_outfits")
     .select("*")
+    .neq("status", "deleted")
     .order("created_at", { ascending: false })
     .limit(60);
 

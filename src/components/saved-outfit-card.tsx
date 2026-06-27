@@ -1,3 +1,4 @@
+import { SavedOutfitActions } from "@/components/saved-outfit-actions";
 import type { SavedOutfit, SavedOutfitPiece } from "@/lib/outfits/data";
 
 function formatDate(value: string) {
@@ -87,9 +88,13 @@ export function SavedOutfitCard({ outfit }: { outfit: SavedOutfit }) {
           </h3>
         </div>
 
-        <span className="rounded-full border border-[rgba(88,119,74,0.28)] bg-[rgba(88,119,74,0.10)] px-3 py-1.5 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--espresso)]">
-          {outfit.status}
-        </span>
+        <div className="flex flex-col items-end gap-3">
+          <span className="rounded-full border border-[rgba(88,119,74,0.28)] bg-[rgba(88,119,74,0.10)] px-3 py-1.5 text-[0.55rem] font-semibold uppercase tracking-[0.18em] text-[var(--espresso)]">
+            {outfit.status}
+          </span>
+
+          <SavedOutfitActions outfitId={outfit.id} outfitTitle={outfit.title} />
+        </div>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">

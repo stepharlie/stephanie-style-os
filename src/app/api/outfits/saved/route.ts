@@ -132,6 +132,52 @@ export async function POST(request: Request) {
   });
 }
 
+
+export async function DELETE(request: Request) {
+  const supabase = getSupabaseServerClient();
+
+  if (!supabase) {
+    return NextResponse.json(
+      { ok: false, error: "Supabase is not configured." },
+      { status: 500 },
+    );
+  }
+
+  let body: { id?: string };
+
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "Invalid request body." },
+      { status: 400 },
+    );
+  }
+
+  const id = normalizeText(body.id);
+
+  if (!id) {
+    return NextResponse.json(
+      { ok: false, error: "Saved outfit id is required." },
+      { status: 400 },
+    );
+  }
+
+  const { error } = await supabase
+    .from("saved_outfits")
+    .update({ status: "deleted" })
+    .eq("id", id);
+
+  if (error) {
+    return NextResponse.json(
+      { ok: false, error: error.message },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.json({ ok: true, id, action: "deleted" });
+}
+
 export async function GET() {
   const supabase = getSupabaseServerClient();
 
