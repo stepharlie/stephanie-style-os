@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
+import { GeneratedOutfitVisual } from "@/components/generated-outfit-visual";
 import {
   composeOutfits,
   type ComposedOutfit,
@@ -53,9 +54,23 @@ function getPieceText(look: ComposedOutfit) {
   return look.items.map((item) => item.label).join(" + ");
 }
 
-function GeneratedLookCard({ look, index }: { look: ComposedOutfit; index: number }) {
+function GeneratedLookCard({
+  look,
+  index,
+  closetItems,
+}: {
+  look: ComposedOutfit;
+  index: number;
+  closetItems: WardrobeItem[];
+}) {
+  const visualItems = look.pieceIds
+    .map((pieceId) => closetItems.find((item) => item.id === pieceId))
+    .filter((item): item is WardrobeItem => Boolean(item));
+
   return (
     <article className="rounded-[8px] border border-[var(--line)] bg-[var(--paper)] p-6 shadow-[0_18px_60px_rgba(74,47,34,0.05)]">
+      <GeneratedOutfitVisual items={visualItems} />
+
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-[0.55rem] font-semibold uppercase tracking-[0.22em] text-[var(--caramel)]">
@@ -305,7 +320,7 @@ export function OutfitBuilder({ items }: OutfitBuilderProps) {
           {generatedLooks.length > 0 ? (
             <div className="grid gap-6 lg:grid-cols-2">
               {generatedLooks.map((look, index) => (
-                <GeneratedLookCard key={look.id} look={look} index={index} />
+                <GeneratedLookCard key={look.id} look={look} index={index} closetItems={activeItems} />
               ))}
             </div>
           ) : (
