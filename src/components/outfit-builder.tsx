@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
-import { GeneratedOutfitVisual } from "@/components/generated-outfit-visual";
+import { EditableShoeSwap } from "@/components/editable-shoe-swap";
 import {
   composeOutfits,
   type ComposedOutfit,
@@ -69,7 +69,7 @@ function GeneratedLookCard({
 
   return (
     <article className="rounded-[8px] border border-[var(--line)] bg-[var(--paper)] p-6 shadow-[0_18px_60px_rgba(74,47,34,0.05)]">
-      <GeneratedOutfitVisual items={visualItems} />
+      <EditableShoeSwap items={visualItems} closetItems={closetItems} />
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
