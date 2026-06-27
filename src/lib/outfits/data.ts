@@ -6,6 +6,9 @@ export type SavedOutfitPiece = {
   id?: string;
   name: string;
   category?: string;
+  subcategory?: string | null;
+  slotId?: string | null;
+  slotLabel?: string | null;
   colorFamily?: string;
   colorName?: string;
   imagePath?: string | null;
@@ -79,6 +82,9 @@ function normalizeSavedPieces(value: unknown): SavedOutfitPiece[] {
       id: typeof piece.id === "string" ? piece.id : undefined,
       name: normalizeText(piece.name, "Unnamed piece"),
       category: typeof piece.category === "string" ? piece.category : undefined,
+      subcategory: typeof piece.subcategory === "string" ? piece.subcategory : null,
+      slotId: typeof piece.slotId === "string" ? piece.slotId : null,
+      slotLabel: typeof piece.slotLabel === "string" ? piece.slotLabel : null,
       colorFamily:
         typeof piece.colorFamily === "string" ? piece.colorFamily : undefined,
       colorName: typeof piece.colorName === "string" ? piece.colorName : undefined,

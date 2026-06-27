@@ -10,12 +10,34 @@ function formatDate(value: string) {
 
 function formatMachineLabel(value?: string | null) {
   if (!value) return "Not set";
-  return value.replaceAll("_", " ").replaceAll("-", " ");
+
+  return value
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function getScore(outfit: SavedOutfit, key: string) {
   const value = outfit.scores[key];
   return typeof value === "number" ? value : "—";
+}
+
+function getPieceGroupLabel(piece: SavedOutfitPiece) {
+  if (piece.slotLabel) return piece.slotLabel;
+  if (piece.subcategory) return formatMachineLabel(piece.subcategory);
+  if (piece.category) return formatMachineLabel(piece.category);
+  return "Piece";
+}
+
+function groupPiecesBySlot(pieces: SavedOutfitPiece[]) {
+  const groups = new Map<string, SavedOutfitPiece[]>();
+
+  for (const piece of pieces) {
+    const label = getPieceGroupLabel(piece);
+    groups.set(label, [...(groups.get(label) ?? []), piece]);
+  }
+
+  return Array.from(groups.entries());
 }
 
 function SavedPieceTile({ piece }: { piece: SavedOutfitPiece }) {
@@ -32,11 +54,12 @@ function SavedPieceTile({ piece }: { piece: SavedOutfitPiece }) {
 
 export function SavedOutfitCard({ outfit }: { outfit: SavedOutfit }) {
   const visiblePieces = outfit.selectedPieces.slice(0, 6);
-  const pieceNames = outfit.selectedPieces.map((piece) => piece.name).join(" + ");
+  const hiddenPieceCount = Math.max(outfit.selectedPieces.length - visiblePieces.length, 0);
+  const groupedPieces = groupPiecesBySlot(outfit.selectedPieces);
 
   return (
     <article className="rounded-[8px] border border-[var(--line)] bg-[var(--paper)] p-6 shadow-[0_18px_60px_rgba(74,47,34,0.05)]">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="relative grid grid-cols-3 gap-3">
         {visiblePieces.length > 0 ? (
           visiblePieces.map((piece, index) => (
             <SavedPieceTile key={`${piece.id ?? piece.name}-${index}`} piece={piece} />
@@ -46,6 +69,12 @@ export function SavedOutfitCard({ outfit }: { outfit: SavedOutfit }) {
             No pieces saved.
           </div>
         )}
+
+        {hiddenPieceCount > 0 ? (
+          <span className="absolute bottom-3 right-3 rounded-full border border-[var(--line)] bg-[rgba(255,255,255,0.88)] px-3 py-1.5 text-[0.55rem] font-semibold uppercase tracking-[0.16em] text-[var(--espresso)] shadow-sm">
+            +{hiddenPieceCount} more
+          </span>
+        ) : null}
       </div>
 
       <div className="mt-6 flex flex-wrap items-start justify-between gap-4">
@@ -78,11 +107,25 @@ export function SavedOutfitCard({ outfit }: { outfit: SavedOutfit }) {
 
       <div className="mt-5 rounded-[4px] border border-[var(--line)] bg-[var(--paper-2)] p-4">
         <p className="text-[0.55rem] font-semibold uppercase tracking-[0.2em] text-[var(--caramel)]">
-          Pieces
+          Pieces by slot
         </p>
-        <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
-          {pieceNames || "No pieces saved."}
-        </p>
+
+        {groupedPieces.length > 0 ? (
+          <dl className="mt-3 space-y-2 text-sm leading-6">
+            {groupedPieces.map(([label, pieces]) => (
+              <div key={label} className="grid gap-1 sm:grid-cols-[130px_1fr]">
+                <dt className="font-semibold text-[var(--espresso)]">{label}</dt>
+                <dd className="text-[var(--ink-soft)]">
+                  {pieces.map((piece) => piece.name).join(" + ")}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        ) : (
+          <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
+            No pieces saved.
+          </p>
+        )}
       </div>
 
       <div className="mt-5 space-y-2 text-sm leading-6 text-[var(--ink-soft)]">
