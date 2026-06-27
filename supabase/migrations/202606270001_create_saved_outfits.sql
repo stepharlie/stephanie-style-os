@@ -1,3 +1,5 @@
+create extension if not exists pgcrypto;
+
 create table if not exists public.saved_outfits (
   id uuid primary key default gen_random_uuid(),
   title text not null,
@@ -24,3 +26,31 @@ create index if not exists saved_outfits_status_idx
 
 create index if not exists saved_outfits_created_at_idx
   on public.saved_outfits(created_at desc);
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists set_saved_outfits_updated_at on public.saved_outfits;
+
+create trigger set_saved_outfits_updated_at
+before update on public.saved_outfits
+for each row
+execute function public.set_updated_at();
+
+alter table public.saved_outfits enable row level security;
+
+drop policy if exists "Service role can manage saved outfits" on public.saved_outfits;
+
+create policy "Service role can manage saved outfits"
+on public.saved_outfits
+for all
+to service_role
+using (true)
+with check (true);
